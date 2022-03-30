@@ -1,4 +1,5 @@
 const {defineConfig} = require('@vue/cli-service')
+const path = require("path");
 module.exports = defineConfig({
   publicPath: "./", // 部署应用包时的基本 URL
   outputDir: "dist", // 生成的生产环境构建文件的目录
@@ -19,5 +20,10 @@ module.exports = defineConfig({
       }
     }
   },
-  pluginOptions: {}, // 插件配置项
+  pluginOptions: {
+    "style-resources-loader": {
+      preProcessor: "less",
+      patterns: [path.resolve(__dirname, "src/style/index.less")] // 引入全局样式变量
+    },
+  }, // 插件配置项
 })

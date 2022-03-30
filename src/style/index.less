@@ -1,0 +1,55 @@
+@title: #333333; // app标题颜色
+@theme: #FD9955; // 主题色
+@themeBg: #FFFFFF; // 主题背景色
+@emphasisBg: #1A1C1D; // 重要背景色
+@emphasis: #FD0212; // 重要色
+@success: @theme; // 成功色
+@error: @emphasis; // 错误色
+@holder: #919398; // 占位色
+@mainBg: #282828; // 主背景色
+@disabled: #999999; // 禁用色
+@base: #999999; // 基础色
+@default: #ffffff; // 默认色
+@reverse: @theme; // 反色
+@border: #999999; // 边框颜色
+
+.padding-box {
+  padding: 0 15px;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-row {
+  .flex();
+  align-items: center;
+}
+
+.flex-between {
+  .flex-row();
+  justify-content: space-between;
+}
+
+.flex-evenly {
+  .flex-row();
+  justify-content: space-evenly;
+}
+
+.flex-around {
+  .flex-row();
+  justify-content: space-around;
+}
+
+.flex-column {
+  .flex();
+  flex-direction: column;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.align-end {
+  align-items: flex-end;
+}

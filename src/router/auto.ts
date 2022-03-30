@@ -57,7 +57,7 @@ export function getAutoRoutes(ignore?: string[]): RouteRecordRaw[] {
       component: item.default,
       children: item.default.children,
       redirect: item.default.redirect,
-      meta: item.default.meta,
+      meta: item.default.meta || {},
     }
     if (fileInfo.origin[0] !== "home" || fileInfo.origin[1] != "index") {
       fileInfo.origin.forEach(function (p, index) {
@@ -73,6 +73,10 @@ export function getAutoRoutes(ignore?: string[]): RouteRecordRaw[] {
 
     if (item.default.urlName) {
       routeItem.path = `${routeItem.path}/:${item.default.urlName}`
+    }
+
+    if (item.default.title) {
+      routeItem.meta.title = item.default.title;
     }
 
     autoRoutes.push(routeItem);

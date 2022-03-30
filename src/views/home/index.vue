@@ -1,18 +1,19 @@
 <template>
-  <div class="home  ">
-
-  </div>
+  <page title="标题" class="home">
+    <div class="margin-box"></div>
+    <button class="btnCom">111</button>
+  </page>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, toRefs } from 'vue';
+import {defineComponent, reactive, toRefs} from 'vue';
+import Page from "@/components/Page.vue";
 
 export default defineComponent({
-  setup(){
-    const data = reactive({
-      
-    })
-    
+  components: {Page},
+  setup() {
+    const data = reactive({})
+
     return {
       ...toRefs(data),
     }
@@ -21,5 +22,14 @@ export default defineComponent({
 </script>
 
 <style scoped lang="less">
+.page{
+  background-color: #dddddd;
+  padding-top: 50px;
 
+  .margin-box {
+    margin-top: 20px;
+    width: 100%;
+    background-color: black;
+  }
+}
 </style>
