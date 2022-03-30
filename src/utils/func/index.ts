@@ -116,7 +116,7 @@ export class SimpleUtils extends SimpleEventHandler {
 export async function uploadFileList(fileList: Array<File>): Promise<string[]> {
   const formData = new FormData();
   for (const i in fileList) formData.append(`data${i}`, fileList[i]);
-  const res = simpleRequest.request({
+  const res = await simpleRequest.request({
     url: "/upload",
     method: "POST",
     isFormData: true,
