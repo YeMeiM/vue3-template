@@ -23,8 +23,7 @@ export default defineComponent({
 
 <style scoped lang="less">
 .page{
-  background-color: #dddddd;
-  padding-top: 50px;
+  //padding-top: var(--simple-header-bar-height);
 
   .margin-box {
     margin-top: 20px;

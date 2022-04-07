@@ -11,6 +11,7 @@ import {_uu} from "@/utils/func";
 
 const router = useRouter();
 
+
 function updateDocumentTitle(text: string | string[]) {
   if (Array.isArray(text)) {
     text = text.join(" - ");

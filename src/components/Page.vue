@@ -1,17 +1,29 @@
 <template>
   <div class="page-container page" :style="{background}">
     <HeaderBar v-if="showHeader" :title="title" :is-back="isBack" v-bind="headerAttr"/>
-    <slot name="default"/>
-    <slot name="loadStatus" v-if="typeof loading === 'boolean'"
-          :loading="loading" :finished="finished">
-      <van-loading v-show="loading" v-if="loadingText" type="spinner">{{ loadingText }}</van-loading>
-      <p class="load-finished" v-if="finishedText" v-show="finished">{{ finishedText }}</p>
-    </slot>
+    <!--如果需要下拉刷新-->
+    <van-pull-refresh v-model="refresh" @refresh="onRefresh" v-if="pullRefresh" >
+      <slot name="default"/>
+      <slot name="loadStatus" v-if="typeof loading === 'boolean'"
+            :loading="loading" :finished="finished">
+        <van-loading v-show="loading" v-if="loadingText" type="spinner">{{ loadingText }}</van-loading>
+        <p class="load-finished" v-if="finishedText" v-show="finished">{{ finishedText }}</p>
+      </slot>
+    </van-pull-refresh>
+    <!-- 不需要下拉刷新 -->
+    <template v-else>
+      <slot name="default"/>
+      <slot name="loadStatus" v-if="typeof loading === 'boolean'"
+            :loading="loading" :finished="finished">
+        <van-loading v-show="loading" v-if="loadingText" type="spinner" >{{ loadingText }}</van-loading>
+        <p class="load-finished" v-if="finishedText" v-show="finished">{{ finishedText }}</p>
+      </slot>
+    </template>
   </div>
 </template>
 
 <script lang="ts">
-import {computed, defineComponent, onMounted, onUnmounted, toRef, watch} from 'vue';
+import {computed, defineComponent, onMounted, onUnmounted, reactive, toRef, toRefs, watch} from 'vue';
 import HeaderBar from "@/components/HeaderBar.vue";
 
 export default defineComponent({
@@ -96,10 +108,22 @@ export default defineComponent({
     finishedText: {
       type: String,
       default: "没有更多了~"
-    }
+    },
+    // 是否需要下拉刷新
+    pullRefresh: {
+      type: Boolean,
+      default: false,
+    },
   },
   setup(props, ctx) {
 
+    // 数据对象
+    const data = reactive({
+      // 刷新状态
+      refresh: false,
+    })
+
+    // 当请求列表数据时，触发
     function onLoad() {
       if (!props.loading && !props.finished) {
         ctx.emit("update:loading", true);
@@ -107,6 +131,7 @@ export default defineComponent({
       }
     }
 
+    // 当页面滚动时，触发
     function onWindowScroll(event?: Event) {
       const dEl = document.documentElement;
       const scrollBottom = dEl.scrollHeight - dEl.clientHeight - dEl.scrollTop;
@@ -123,6 +148,12 @@ export default defineComponent({
       }
     }
 
+    // 当触发刷新时
+    function onRefresh() {
+      onLoad();
+    }
+
+    // 头部导航栏参数
     const headerAttr = computed(() => ({
       backText: props.backText,
       backUrl: props.backUrl,
@@ -136,24 +167,34 @@ export default defineComponent({
       backIcon: props.backIcon,
     }))
 
+    // 添加窗口滚动监听
     window.addEventListener("scroll", onWindowScroll);
 
+    // 页面加载完成时，触发
     onMounted(function () {
       if (props.immediate) {
         onLoad();
       }
     })
 
+    // 页面卸载时，触发
     onUnmounted(function () {
       window.removeEventListener("scroll", onWindowScroll);
     })
 
+    // 监听列表加载状态
     watch(toRef(props, "loading"), function (val) {
-      !val && onWindowScroll();
+      // 如果加载状态为结束，触发窗口滚动监听，并且取消刷新状态
+      if (!val) {
+        onWindowScroll();
+        data.refresh = false;
+      }
     })
 
     return {
-      headerAttr
+      headerAttr,
+      ...toRefs(data),
+      onRefresh,
     }
   },
 })
@@ -177,6 +218,10 @@ export default defineComponent({
     padding: 10px 20px;
     --van-loading-spinner-size: 22px;
     --van-loading-text-color: var(--page-holder-text-color, @holder);
+  }
+
+  :deep(.van-pull-refresh__track) {
+    min-height: calc(100vh - var(--simple-header-bar-height));
   }
 }
 </style>
