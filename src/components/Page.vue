@@ -1,3 +1,4 @@
+<!--Vue页面容器-->
 <template>
   <div class="page-container page" :style="{background}">
     <HeaderBar v-if="showHeader" :title="title" :is-back="isBack" v-bind="headerAttr"/>
@@ -101,15 +102,23 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    /**
+     * 列表加载状态文字
+     */
     loadingText: {
       type: String,
       default: "加载中..."
     },
+    /**
+     * 列表加载完成文字
+     */
     finishedText: {
       type: String,
       default: "没有更多了~"
     },
-    // 是否需要下拉刷新
+    /**
+     * 是否需要下拉刷新
+     */
     pullRefresh: {
       type: Boolean,
       default: false,

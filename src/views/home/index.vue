@@ -1,5 +1,5 @@
 <template>
-  <page title="标题" class="home">
+  <page title="标题" class="home" is-back>
     <div class="margin-box"></div>
     <button class="btnCom">111</button>
   </page>
