@@ -3,8 +3,7 @@
     <div class="header-bar" :style="customStyle" :class="{ 'fix-bar': !staticBar, 'border-bar': border }">
       <div class="left-container">
         <div class="back-box" v-if="!isBack" @click="onClickHandler(1)">
-          <img :src="backIcon" alt="返回" class="back-icon" v-if="backIcon">
-          <van-icon name="arrow-left" v-else size="0.55rem"/>
+          <img :src="backIcon" alt="返回" class="back-icon">
           <span class="back-text" v-if="backText">{{ backText }}</span>
         </div>
       </div>
@@ -47,6 +46,7 @@ export default defineComponent({
     },
     backIcon: {
       type: String,
+      default: require("@/assets/image/fanhui-icn@2x.png"),
     },
     backUrl: {
       type: String,
@@ -81,7 +81,12 @@ export default defineComponent({
 
     let lastClickTitle = 0;
 
+    /**
+     * 点击事件
+     * @param type 0 title 1 back 2 right
+     */
     function onClickHandler(type: number) {
+      // 双击标题
       if (type === 0) {
         const now = new Date().getTime();
         if (now - lastClickTitle <= 200) {
@@ -90,21 +95,28 @@ export default defineComponent({
         lastClickTitle = now;
       } else {
         let url: any;
+        // 左侧按钮
         if (type === 1) {
           url = props.backUrl;
           ctx.emit("clickLeft", (): void => (url = undefined))
-        } else {
-          ctx.emit("clickRight", (): void => (url = undefined))
+        }
+        // 右侧按钮
+        else {
+          console.log("right");
           url = props.rightUrl
+          ctx.emit("clickRight", (): void => (url = undefined))
         }
 
+        // 如果url是空字符串, 返回上一页
         if (url === "") {
           if (window.history.state.position === 0) {
             _uu.$emit("native:handler", "back");
           } else {
             router.back();
           }
-        } else if (url) {
+        }
+        // 如果url不为空, 跳转
+        else if (url) {
           router.push(url);
         }
 

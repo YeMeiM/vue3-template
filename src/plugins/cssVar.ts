@@ -1,7 +1,5 @@
 // 动态css
-const styleEl = document.createElement("style");
-styleEl.type = "text/css"
-document.head.appendChild(styleEl);
+let styleEl: HTMLStyleElement = null;
 
 const varBox = new Map<string, string>();
 
@@ -11,6 +9,12 @@ const varBox = new Map<string, string>();
  * @param value 变量值，如果变量为数字，则会拼接上px，字符串不作处理，数组会使用【,】拼接
  */
 export function setVar(name: string, value: number | string | string[]) {
+  if (!styleEl) {
+    styleEl = document.createElement("style")
+    styleEl.type = "text/css"
+    document.head.appendChild(styleEl);
+  }
+
   if (typeof value === "number") {
     value = `${value}px`;
   } else {

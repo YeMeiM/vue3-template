@@ -123,11 +123,12 @@ export function onLoadList<T = {}, L = any>(options: LoadHandler<T, L> | (Must<P
   }
 
   const onRefresh = () => {
+    opt.list.value = [];
     opt.form.lastId = 0;
     opt.form.page = 1;
     opt.lBox.finished = false;
     opt.lBox.loading = false;
-    if(opt.beforeRefresh){
+    if (opt.beforeRefresh) {
       opt.beforeRefresh(opt.form);
     }
     onLoad();
