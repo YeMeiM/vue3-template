@@ -61,6 +61,10 @@ export class SimpleUtils extends SimpleEventHandler {
     }).then((canvas: HTMLCanvasElement) => resolve(canvas.toDataURL("image/png"))))
   }
 
+  /**
+   * 确认框
+   * @param opt
+   */
   confirm(opt: {
     title?: string;
     message?: string | (() => JSX.Element),
