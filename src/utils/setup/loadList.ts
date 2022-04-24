@@ -1,4 +1,4 @@
-import {isRef, reactive, ref, Ref} from "vue";
+import { isRef, reactive, ref, Ref } from "vue";
 
 export interface LoadListForm {
   lastId: number;
@@ -64,7 +64,7 @@ export type LoadHandler<T, L> = (form: T & LoadListForm) => Promise<LoadListData
 
 function getLBox(lBox?: Partial<LBox>): LBox {
   if (!lBox) {
-    return reactive({loading: false, finished: false, error: false,})
+    return reactive({ loading: false, finished: false, error: false, })
   }
   lBox.finished === undefined && (lBox.finished = false);
   lBox.loading === undefined && (lBox.loading = false);
@@ -75,7 +75,7 @@ function getLBox(lBox?: Partial<LBox>): LBox {
 
 function getForm<T>(form?: T): T & LoadListForm {
   if (!form) {
-    return {lastId: 0, page: 1} as any;
+    return { lastId: 0, page: 1 } as any;
   } else {
     if ((form as any).lastId === undefined) {
       (form as any).lastId = 0;
@@ -88,7 +88,7 @@ function getForm<T>(form?: T): T & LoadListForm {
 }
 
 function getOpt<T, L>(opt: LoadHandler<T, L> | (Must<Partial<LoadListOption<T, L>>, "handler">)): LoadListOption<T & LoadListForm, L> & { list: Ref<L[]> } {
-  const result: any = typeof opt === "function" ? {handler: opt} : opt;
+  const result: any = typeof opt === "function" ? { handler: opt } : opt;
   result.lBox = getLBox(result.lBox);
   result.form = getForm(result.form);
   result.list = (result.list ? isRef(result.list) ? result.list : ref(result.list) : ref([]));
@@ -106,7 +106,7 @@ export function onLoadList<T = {}, L = any>(options: LoadHandler<T, L> | (Must<P
     opt.print && console.log(typeof opt.print === "string" ? `${opt.print} ->` : 'list ->', res);
     opt.afterResponse && opt.afterResponse(res);
     opt.form.lastId = res.lastId;
-    opt.form.page = 1;
+    opt.form.page++;
     opt.list.value = opt.list.value.concat(res.list);
     opt.lBox.loading = false;
     if (res.currentPage >= res.lastPage) {
@@ -127,7 +127,7 @@ export function onLoadList<T = {}, L = any>(options: LoadHandler<T, L> | (Must<P
     opt.form.lastId = 0;
     opt.form.page = 1;
     opt.lBox.finished = false;
-    opt.lBox.loading = false;
+    opt.lBox.loading = true;
     if (opt.beforeRefresh) {
       opt.beforeRefresh(opt.form);
     }

@@ -1,30 +1,101 @@
 <template>
-  <div class="page-container page" :style="{background}">
-    <HeaderBar v-if="showHeader" :title="title" :is-back="isBack" v-bind="headerAttr"
-               @clickLeft="$emit('clickLeft',$event)" @clickRight="$emit('clickRight',$event)" @dbClick="$emit('dbClick',$event)" />
-    <slot name="default"/>
-    <slot name="loadStatus" v-if="typeof loading === 'boolean'"
-          :loading="loading" :finished="finished">
-      <van-loading v-show="loading" v-if="loadingText" type="spinner">{{ loadingText }}</van-loading>
-      <p class="load-finished" v-if="finishedText" v-show="finished">{{ finishedText }}</p>
-    </slot>
+  <div class="page-container page" :style="{ background }">
+    <HeaderBar
+      v-if="showHeader"
+      :title="title"
+      :is-back="isBack"
+      v-bind="headerAttr"
+      @clickLeft="$emit('clickLeft', $event)"
+      @clickRight="$emit('clickRight', $event)"
+      @dbClick="$emit('dbClick', $event)"
+    />
+    <van-pull-refresh
+      v-if="refresh"
+      @refresh="onRefresh"
+      :modelValue="refreshLoading"
+      @update:modelValue="onUpdateLoading"
+      class="page-inner-container"
+    >
+      <slot name="default" />
+      <slot
+        name="loadStatus"
+        v-if="typeof loading === 'boolean'"
+        :loading="loading"
+        :finished="finished"
+      >
+        <van-loading v-show="loading" v-if="loadingText" type="spinner">{{
+          loadingText
+        }}</van-loading>
+        <p class="load-finished" v-if="finishedText" v-show="finished">
+          {{ finishedText }}
+        </p>
+      </slot>
+    </van-pull-refresh>
+    <div class="page-inner-container" v-else>
+      <slot name="default" />
+      <slot
+        name="loadStatus"
+        v-if="typeof loading === 'boolean'"
+        :loading="loading"
+        :finished="finished"
+      >
+      <p class="load-finished" v-if="finishedText" v-show="finished">
+          {{ finishedText }}
+        </p>
+        <van-loading v-show="!finished && loading" v-if="loadingText" type="spinner">{{
+          loadingText
+        }}</van-loading>
+      </slot>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import {computed, defineComponent, onMounted, onUnmounted, toRef, watch} from 'vue';
+import {
+  computed,
+  defineComponent,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  toRef,
+  toRefs,
+  watch,
+} from "vue";
 import HeaderBar from "@/components/HeaderBar.vue";
 
 export default defineComponent({
   emits: {
-    "load": null,
+    /**
+     * 加载列表
+     */
+    load: null,
+    /**
+     * 更新loading状态
+     */
     "update:loading": null,
-    "scroll": null,
-    "clickRight": null,
-    "clickLeft": null,
-    "dbClick": null,
+    /**
+     * 页面滚动
+     */
+    scroll: null,
+    /**
+     * 点击右侧按钮
+     */
+    clickRight: null,
+    /**
+     * 点击左侧按钮
+     */
+    clickLeft: null,
+    /**
+     * 双击标题
+     */
+    dbClick: null,
+    /**
+     * 页面刷新
+     */
+    refresh: null,
   },
-  components: {HeaderBar},
+  components: { HeaderBar },
   props: {
     title: {
       type: String,
@@ -49,13 +120,13 @@ export default defineComponent({
     },
     showHeader: {
       type: Boolean,
-      default: true
+      default: true,
     },
     staticBar: {
       type: Boolean,
     },
     headerBorder: {
-      type: Boolean
+      type: Boolean,
     },
     background: {
       type: String,
@@ -84,7 +155,7 @@ export default defineComponent({
      */
     finished: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     /**
      * 立刻加载列表
@@ -93,25 +164,48 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    /**
+     * 列表加载中文本
+     */
     loadingText: {
       type: String,
-      default: "加载中..."
+      default: "加载中...",
     },
+    /**
+     * 列表加载完成提示文案
+     */
     finishedText: {
       type: String,
-      default: "没有更多了~"
-    }
+    },
+    /**
+     * 是否需要刷新
+     */
+    refresh: {
+      type: Boolean,
+      defualt: false,
+    },
   },
   setup(props, ctx) {
+    const data = reactive({
+      refreshLoading: false,
+    });
+
+    function onUpdateLoading(loading: boolean) {
+      // console.log("update loading", loading);
+      data.refreshLoading = loading;
+      ctx.emit("update:loading", loading);
+    }
 
     function onLoad() {
       if (!props.loading && !props.finished) {
+        console.log("load -list");
         ctx.emit("update:loading", true);
         ctx.emit("load");
       }
     }
 
     function onWindowScroll(event?: Event) {
+      // console.log("window Scroll", event);
       const dEl = document.documentElement;
       const scrollBottom = dEl.scrollHeight - dEl.clientHeight - dEl.scrollTop;
       if (event) {
@@ -120,11 +214,16 @@ export default defineComponent({
           left: dEl.scrollLeft,
           bottom: scrollBottom,
           right: dEl.scrollWidth - dEl.clientWidth - dEl.scrollLeft,
-        })
+        });
       }
-      if (scrollBottom === 0) {
+      if (scrollBottom <= 10) {
         onLoad();
       }
+    }
+
+    function onRefresh() {
+      // console.log("page refresh", props.loading);
+      ctx.emit("refresh");
     }
 
     const headerAttr = computed(() => ({
@@ -138,29 +237,35 @@ export default defineComponent({
       noHolder: props.noHolder,
       noStatus: props.noStatus,
       backIcon: props.backIcon,
-    }))
-
-    window.addEventListener("scroll", onWindowScroll);
+    }));
 
     onMounted(function () {
       if (props.immediate) {
         onLoad();
       }
-    })
+      window.addEventListener("scroll", onWindowScroll);
+    });
 
-    onUnmounted(function () {
+    onBeforeUnmount(function () {
       window.removeEventListener("scroll", onWindowScroll);
-    })
+    });
 
     watch(toRef(props, "loading"), function (val) {
-      !val && onWindowScroll();
-    })
+      // console.log("change loading", val);
+      if (!val) {
+        nextTick(onWindowScroll);
+        data.refreshLoading = false;
+      }
+    });
 
     return {
-      headerAttr
-    }
+      ...toRefs(data),
+      headerAttr,
+      onRefresh,
+      onUpdateLoading,
+    };
   },
-})
+});
 </script>
 
 <style scoped lang="less">
@@ -182,6 +287,10 @@ export default defineComponent({
     padding: 10px 20px;
     --van-loading-spinner-size: 22px;
     --van-loading-text-color: var(--page-holder-text-color, @holder);
+  }
+
+  .page-inner-container {
+    flex: 1;
   }
 }
 </style>
