@@ -1,8 +1,8 @@
-import {SimpleEventHandler} from "@/utils/event";
+import { SimpleEventHandler } from "@/utils/event";
 import useClipboard from 'vue-clipboard3'
-import {Dialog} from "vant/lib/dialog"
-import {getCurrentInstance} from "vue";
-import {simpleRequest} from "@/utils/request"
+import { Dialog } from "vant/lib/dialog"
+import { getCurrentInstance } from "vue";
+import { simpleRequest } from "@/utils/request"
 import * as verification from "@/utils/common/verification";
 
 export class SimpleUtils extends SimpleEventHandler {
@@ -104,10 +104,20 @@ export class SimpleUtils extends SimpleEventHandler {
 
   private static UU_STORE_NAME = "UU_STORE"
 
+  /**
+   * 保存数据到本地存储中
+   * @param name 储存时的名字
+   * @param value 储蓄的值
+   */
   saveBox(name: string, value: any): void {
-    localStorage.setItem(`${SimpleUtils.UU_STORE_NAME}_${name}`, JSON.stringify({data: value,}))
+    localStorage.setItem(`${SimpleUtils.UU_STORE_NAME}_${name}`, JSON.stringify({ data: value, }))
   }
 
+  /**
+   * 取出储存的值，如果没有，则返回null
+   * @param name 储存时的名字
+   * @returns 储存的值
+   */
   getBox(name: string): any {
     const value = localStorage.getItem(`${SimpleUtils.UU_STORE_NAME}_${name}`);
     if (!value) {
@@ -115,8 +125,21 @@ export class SimpleUtils extends SimpleEventHandler {
     }
     return JSON.parse(value).data;
   }
+
+  /**
+   * 删除储存的值
+   * @param name 储存时的名字
+   */
+  removeBox(name: string): void {
+    localStorage.removeItem(`${SimpleUtils.UU_STORE_NAME}_${name}`)
+  }
 }
 
+/**
+ * 上传一群文件
+ * @param fileList 文件列表
+ * @returns 上传后的文件地址列表
+ */
 export async function uploadFileList(fileList: Array<File>): Promise<string[]> {
   const formData = new FormData();
   for (const i in fileList) formData.append(`data${i}`, fileList[i]);
@@ -126,10 +149,16 @@ export async function uploadFileList(fileList: Array<File>): Promise<string[]> {
     isFormData: true,
     data: formData,
     isModule: true,
+    enc: true,
   })
   return Object.keys(res).map(k => (res as any)[k]);
 }
 
+/**
+ * 上传一个文件
+ * @param file 文件
+ * @returns 文件地址
+ */
 export async function uploadFile(file: File): Promise<string> {
   return (await uploadFileList([file]))[0];
 }

@@ -100,7 +100,7 @@ export interface SimpleRequestInitConfig<T = any> {
    */
   baseUrl?: string;
   /**
-   * 默认超时事件
+   * 超时时间
    */
   timeout?: number;
   /**
@@ -109,7 +109,7 @@ export interface SimpleRequestInitConfig<T = any> {
    */
   beforeRequest?: (opt: SimpleRequestMore<T>) => SimpleRequestMore<T>;
   /**
-   * 请求信息处理事件
+   * 请求前信息处理事件
    * @param opt 请求处理
    */
   beforeInitRequest?: (opt: SimpleRequestMore<T> | string) => SimpleRequestMore<T> | string;
@@ -138,11 +138,11 @@ export interface SimpleRequestInitConfig<T = any> {
    */
   afterRequestHandler?: (response: AxiosResponse, opt: SimpleRequestMore<T>) => any;
   /**
-   * 默认的请求方式
+   * 请求方式
    */
   method?: Method;
   /**
-   * 默认是否使用FormData请求
+   * 是否使用FormData请求
    */
   isFormData?: boolean;
 }
@@ -154,7 +154,6 @@ export const simpleRequestInitDefaultConfig = {
   timeout: 100000,
   isFormData: true,
   method: "GET",
-  enc: true,
 }
 
 type SimpleRequestMore<T> = SimpleRequestConfig & T;
