@@ -149,7 +149,7 @@ export async function uploadFileList(fileList: Array<File>): Promise<string[]> {
     isFormData: true,
     data: formData,
     isModule: true,
-    enc: true,
+    enc: process.env.VUE_APP_ENC === "true",
   })
   return Object.keys(res).map(k => (res as any)[k]);
 }
