@@ -3,7 +3,8 @@
     <div class="header-bar" :style="customStyle" :class="{ 'fix-bar': !staticBar, 'border-bar': border }">
       <div class="left-container">
         <div class="back-box" v-if="!isBack" @click="onClickHandler(1)">
-          <img :src="backIcon" alt="返回" class="back-icon">
+          <img :src="backIcon" v-if="backIcon" alt="返回" class="back-icon">
+          <van-icon v-else name="arrow-left" size="0.7rem" ></van-icon>
           <span class="back-text" v-if="backText">{{ backText }}</span>
         </div>
       </div>
@@ -46,7 +47,6 @@ export default defineComponent({
     },
     backIcon: {
       type: String,
-      default: require("@/assets/image/fanhui-icn@2x.png"),
     },
     backUrl: {
       type: String,
