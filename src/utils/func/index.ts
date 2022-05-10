@@ -135,14 +135,51 @@ export class SimpleUtils extends SimpleEventHandler {
   }
 }
 
+// /**
+//  * 上传一群文件
+//  * @param fileList 文件列表
+//  * @returns 上传后的文件地址列表
+//  */
+// export async function uploadFileList(fileList: Array<File>): Promise<string[]> {
+//   const formData = new FormData();
+//   for (const i in fileList) formData.append(`data${i}`, fileList[i]);
+//   const res = await simpleRequest.request({
+//     url: "/upload",
+//     method: "POST",
+//     isFormData: true,
+//     data: formData,
+//     isModule: true,
+//     enc: process.env.VUE_APP_ENC === "true",
+//   })
+//   return Object.keys(res).map(k => (res as any)[k]);
+// }
+
 /**
  * 上传一群文件
- * @param fileList 文件列表
- * @returns 上传后的文件地址列表
+ * @param file 文件列表
+ * @returns 文件地址列表
  */
-export async function uploadFileList(fileList: Array<File>): Promise<string[]> {
+export function uploadFile(file: Array<File>): Promise<string[]>;
+
+/**
+ * 上传一个文件
+ * @param file 文件
+ * @returns 文件地址
+ */
+export function uploadFile(file: File): Promise<string>;
+
+/**
+ * 上传一个或一群文件
+ * @param file 文件或文件列表
+ * @returns 如果是文件，则返回文件地址，如果是文件列表，则返回文件地址列表
+ */
+export async function uploadFile(file: File | Array<File>): Promise<string | string[]> {
   const formData = new FormData();
-  for (const i in fileList) formData.append(`data${i}`, fileList[i]);
+  if (file instanceof File) {
+    formData.append("data", file);
+  } else {
+    for (const i in file) formData.append(`data${i}`, file[i]);
+  }
   const res = await simpleRequest.request({
     url: "/upload",
     method: "POST",
@@ -151,16 +188,12 @@ export async function uploadFileList(fileList: Array<File>): Promise<string[]> {
     isModule: true,
     enc: process.env.VUE_APP_ENC === "true",
   })
-  return Object.keys(res).map(k => (res as any)[k]);
-}
 
-/**
- * 上传一个文件
- * @param file 文件
- * @returns 文件地址
- */
-export async function uploadFile(file: File): Promise<string> {
-  return (await uploadFileList([file]))[0];
+  if (file instanceof File) {
+    return res.data;
+  } else {
+    return Object.keys(res).map(k => (res as any)[k]);
+  }
 }
 
 export const _uu = SimpleUtils.init({
@@ -169,11 +202,7 @@ export const _uu = SimpleUtils.init({
    */
   req: simpleRequest.request.bind(simpleRequest),
   /**
-   * 上传文件列表
-   */
-  uploads: uploadFileList,
-  /**
-   * 上传单个文件
+   * 上传文件或文件列表
    */
   upload: uploadFile,
   /**
