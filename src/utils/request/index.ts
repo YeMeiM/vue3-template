@@ -46,7 +46,7 @@ export const simpleRequest = new SimpleRequest<Partial<SimpleRequestEnc>>({
       }
       if (opt.isModule) {
         !opt.headers && (opt.headers = {});
-        store.state.user && (opt.headers['Authorization'] = store.state.user);
+        store.state.token && (opt.headers['Authorization'] = store.state.token);
       }
     }
     return opt;

@@ -1,7 +1,10 @@
 <template>
   <page title="标题" class="home" is-back>
-    <div class="margin-box"></div>
-    <button class="btnCom">111</button>
+    <template #header>
+      <div class="simple-header-bar">
+        <img src="@/assets/image/logo.png" :alt="appName" class="logo">
+      </div>
+    </template>
   </page>
 </template>
 
@@ -16,6 +19,7 @@ export default defineComponent({
 
     return {
       ...toRefs(data),
+      appName: process.env.VUE_APP_NAME,
     }
   },
 })
@@ -23,7 +27,16 @@ export default defineComponent({
 
 <style scoped lang="less">
 .page{
-  //padding-top: var(--simple-header-bar-height);
+
+  .simple-header-bar{
+    position: sticky;
+    top: 0;
+    height: 44px;
+    color: @default;
+    display: flex;
+    align-items: center;
+    padding: 10px 12px 10px 8px;
+  }
 
   .margin-box {
     margin-top: 20px;

@@ -34,7 +34,7 @@ function isIgnore(path: string): boolean {
 // 设置路由守卫
 router.beforeEach((to, from, next) => {
   // 如果不开启路由收尾、已经登录或者是忽略的路由，则直接进入
-  if (process.env.VUE_APP_ROUTER_GUARD !== "true" || store.state.user || isIgnore(to.path)) {
+  if (process.env.VUE_APP_ROUTER_GUARD !== "true" || store.state.token || isIgnore(to.path)) {
     to.meta.needLogin = false;
     next();
   } else {

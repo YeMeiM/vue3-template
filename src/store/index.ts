@@ -1,13 +1,15 @@
-import {createStore} from 'vuex'
+import { i18n } from '@/i18n';
+import { createStore } from 'vuex'
 
-const USER_NAME = "USER_TOKEN"
+export const USER_TOKEn_NAME = "USER_TOKEN";
+export const USER_LANGUAGE_NAME = "USER_LANGUAGE";
 
 const store = createStore({
   state: {
     /**
      * 用户Token
      */
-    user: "",
+    token: "",
     /**
      * 语言
      */
@@ -19,26 +21,34 @@ const store = createStore({
   },
   mutations: {
     /**
-     * 设置用户token
+     * 设置用户token，如果传入空，则删除token
      * @param state store.state
-     * @param user 用户Token
+    * @param token 用户Token
      */
-    setUser(state, user) {
+    SET_USER_TOKEN(state, token?: string) {
       // state.user = !user || user.startsWith("Bearer") ? user ?? "" : `Bearer ${user}`;
-      state.user = user;
-      if (process.env.VUE_APP_TOKEN_LOCAL_SAVE === "true") {
-        localStorage.setItem(USER_NAME, user)
+      state.token = token ?? "";
+      if (process.env.VUE_APP_TOKEN_LOCAL_SAVE !== "true") {
+        return
+      }
+      if (token) {
+        localStorage.setItem(USER_TOKEn_NAME, token)
+      } else {
+        localStorage.removeItem(USER_TOKEn_NAME);
       }
     },
     /**
-     * 删除用户Token
+     * 设置用户语言
      * @param state store.state
+     * @param language 语言
      */
-    removeUser(state) {
-      state.user = '';
-      if (process.env.VUE_APP_TOKEN_LOCAL_SAVE === "true") {
-        localStorage.removeItem(USER_NAME);
-      }
+    SET_USER_LANGUAGE(state, language?: string) {
+      // 如果传入的语言为空，则设置为默认语言
+      state.language = language ?? "zh";
+      // 设置i18n
+      i18n.global.locale = state.language;
+      // 储存上次选择的语言
+      localStorage.setItem(USER_LANGUAGE_NAME, state.language);
     },
   },
   actions: {},
@@ -46,7 +56,9 @@ const store = createStore({
 })
 
 if (process.env.VUE_APP_TOKEN_LOCAL_SAVE === "true") {
-  store.commit("setUser", localStorage.getItem(USER_NAME));
+  store.commit("SET_USER_TOKEN", localStorage.getItem(USER_TOKEn_NAME) || "");
 }
+
+
 
 export default store;

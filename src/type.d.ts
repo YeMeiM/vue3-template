@@ -57,7 +57,8 @@ interface Window {
      * 手机扫码
      */
     scan: () => void;
-    [propsName: string]: any;
+
+    [props: string]: any;
   };
   /**
    * 支付回调
@@ -75,5 +76,5 @@ interface Window {
    */
   changeversion?: (versionNum: number) => void;
 
-  [propsName: string]: any
+  [props: string]: any
 }

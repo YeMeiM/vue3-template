@@ -1,10 +1,10 @@
 <template>
-  <div class="header-bar-holder" :class="{'holder-show': !noHolder}" :style="{'--status-bar-height':noStatus ? 0:''}">
+  <div class="header-bar-holder" :class="{ 'holder-show': !noHolder, 'no-status': noStatus }">
     <div class="header-bar" :style="customStyle" :class="{ 'fix-bar': !staticBar, 'border-bar': border }">
       <div class="left-container">
         <div class="back-box" v-if="!isBack" @click="onClickHandler(1)">
           <img :src="backIcon" v-if="backIcon" alt="返回" class="back-icon">
-          <van-icon v-else name="arrow-left" size="0.7rem" ></van-icon>
+          <van-icon v-else name="arrow-left" size="0.7rem"></van-icon>
           <span class="back-text" v-if="backText">{{ backText }}</span>
         </div>
       </div>
@@ -21,9 +21,9 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, ref, toRef, watch} from 'vue';
-import {useRouter} from "vue-router";
-import {_uu} from "@/utils/func";
+import { defineComponent, ref, toRef, watch } from 'vue';
+import { useRouter } from "vue-router";
+import { _uu } from "@/utils/func";
 
 export default defineComponent({
   emits: {
@@ -138,6 +138,10 @@ export default defineComponent({
 <style scoped lang="less">
 .header-bar-holder {
 
+  &.no-status {
+    --simple-header-bar-height: 0;
+  }
+
   &.holder-show {
     height: calc(var(--simple-header-bar-height) + var(--status-bar-height));
   }
@@ -150,7 +154,7 @@ export default defineComponent({
   background: var(--simple-header-bar-background);
   display: flex;
   align-items: center;
-  color: #333333;
+  color: var(--simple-header-bar-color, @title);
 
   &.border-bar {
     border-bottom: 1px solid #EAEAEA;
@@ -164,7 +168,9 @@ export default defineComponent({
     z-index: 99;
   }
 
-  .title-container, .back-box, .right-box {
+  .title-container,
+  .back-box,
+  .right-box {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;

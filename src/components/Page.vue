@@ -1,6 +1,7 @@
 <template>
   <div class="page-container page" :style="{ background }">
-    <HeaderBar
+    <slot name="header" >
+      <HeaderBar
       v-if="showHeader"
       :title="title"
       :is-back="isBack"
@@ -9,6 +10,7 @@
       @clickRight="$emit('clickRight', $event)"
       @dbClick="$emit('dbClick', $event)"
     />
+    </slot>
     <van-pull-refresh
       v-if="refresh"
       @refresh="onRefresh"
@@ -275,6 +277,7 @@ export default defineComponent({
   z-index: 0;
   display: flex;
   flex-direction: column;
+  background-color: @default;
 
   .load-finished {
     text-align: center;
