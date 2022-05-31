@@ -1,10 +1,5 @@
 <template>
   <page title="标题" class="home" is-back>
-    <template #header>
-      <div class="simple-header-bar">
-        <img src="@/assets/image/logo.png" :alt="appName" class="logo">
-      </div>
-    </template>
   </page>
 </template>
 

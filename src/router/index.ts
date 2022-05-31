@@ -1,5 +1,5 @@
-import {createRouter, createWebHashHistory, RouteRecordRaw} from 'vue-router'
-import {getAutoRoutes} from "./auto"
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
+import { getAutoRoutes } from "./auto"
 import store from "@/store";
 
 // 路由地址配置
@@ -14,18 +14,27 @@ const router = createRouter({
 })
 
 // 路由拦截忽略
-const ignore = ["/", "/login/*"];
+const ignore = ["/login/*"];
 
 /**
  * 检测是否需要被忽略
  * @param path 路径
  */
 function isIgnore(path: string): boolean {
+  if (process.env.VUE_APP_ROUTER_INTERCEPTOR !== "true") {
+    return true;
+  }
   for (const p of ignore) {
-    if (p.endsWith("/*") && path.startsWith(p.substring(0, p.length - 2))) {
+    // 匹配路径
+    if (p === path) {
       return true;
-    } else if (p === path) {
-      return true;
+    }
+    // 匹配路径前缀
+    if (p.endsWith("/*")) {
+      const p2 = (p.substring(0, p.length - 2));
+      if (p2 === path || path.startsWith(p2)) {
+        return true;
+      }
     }
   }
   return false;
@@ -34,16 +43,12 @@ function isIgnore(path: string): boolean {
 // 设置路由守卫
 router.beforeEach((to, from, next) => {
   // 如果不开启路由收尾、已经登录或者是忽略的路由，则直接进入
-  if (process.env.VUE_APP_ROUTER_GUARD !== "true" || store.state.token || isIgnore(to.path)) {
-    to.meta.needLogin = false;
+  if (store.state.token || isIgnore(to.path)) {
     next();
   } else {
-    to.meta.needLogin = true;
-    if (window.android) {
-      next();
-    } else {
-      next("/login")
-    }
+    next({
+      path: "/login",
+    })
   }
 })
 

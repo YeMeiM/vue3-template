@@ -1,5 +1,9 @@
 <template>
-  <router-view v-if="showPage"/>
+  <router-view v-slot="{ Component, route }">
+    <transition name="van-fade">
+      <component :is="Component" :key="route.path" />
+    </transition>
+  </router-view>
   <van-overlay v-model:show="showLoading" class-name="app-loading-overlay">
     <div class="app-loading-container">
       <van-loading type="spinner">加载中</van-loading>
@@ -8,38 +12,39 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, onUnmounted, ref} from "vue";
-import {useRouter} from "vue-router";
-import {_uu} from "@/utils/func";
-import {useStore} from "vuex";
+import { onUnmounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import { _uu } from "@/utils/func";
 
-const store = useStore();
 const router = useRouter();
 const showLoading = ref(false);
-
-const showPage = computed(function () {
-  return store.state.user || !router.currentRoute.value.meta.needLogin;
-})
-
 /**
  * 用来更新页面标题的方法
  */
-function updateDocumentTitle() {
-  if (router.currentRoute.value.meta.title) {
-    document.title = `${process.env.VUE_APP_NAME} - ${router.currentRoute.value.meta.title}`
-  } else if (document.title !== process.env.VUE_APP_NAME) {
-    document.title = process.env.VUE_APP_NAME
+function updateDocumentTitle(append?: string) {
+  let arr = [];
+  if (process.env.VUE_APP_NAME) {
+    arr.push(process.env.VUE_APP_NAME);
   }
+  if (router.currentRoute.value.meta.title) {
+    arr.push(router.currentRoute.value.meta.title);
+  }
+  if (typeof append === "string") {
+    arr.push(append);
+  }
+  document.title = arr.join(" - ");
+  arr = null;
 }
 
+// 加载状态
 let loadingCount = 0;
 
+/**
+ * 更新加载状态
+ * @param loading 是否加载中
+ */
 function updateLoading(loading: boolean) {
-  if (loading) {
-    loadingCount++;
-  } else if (loadingCount > 0) {
-    loadingCount--;
-  }
+  loadingCount += loading ? 1 : -1;
   showLoading.value = loadingCount > 0;
 }
 
@@ -51,15 +56,15 @@ router.afterEach(function () {
   updateDocumentTitle();
   loadingCount = 0;
   updateLoading(false);
-})
+});
 
 _uu.$on("update:documentTitle", updateDocumentTitle);
-_uu.$on("update:loading", updateLoading)
+_uu.$on("update:loading", updateLoading);
 
 onUnmounted(function () {
-  _uu.$off("update:documentTitle", updateDocumentTitle)
+  _uu.$off("update:documentTitle", updateDocumentTitle);
   _uu.$off("update:loading", updateLoading);
-})
+});
 </script>
 
 <style lang="less">
@@ -78,7 +83,6 @@ onUnmounted(function () {
 }
 
 html {
-
   body {
     font-size: 14px;
     margin: 0;

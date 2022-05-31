@@ -277,7 +277,7 @@ export default defineComponent({
   z-index: 0;
   display: flex;
   flex-direction: column;
-  background-color: @default;
+  background: var(--page-background, @default);
 
   .load-finished {
     text-align: center;
@@ -294,6 +294,7 @@ export default defineComponent({
 
   .page-inner-container {
     flex: 1;
+    padding: var(--page-padding, 0)
   }
 }
 </style>
