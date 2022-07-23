@@ -1,6 +1,6 @@
 interface Window {
   /**
-   * 如果是android套壳则存在test对象
+   * 如果是 @黄玉如 的android套壳则存在test对象
    */
   test?: {
     /**

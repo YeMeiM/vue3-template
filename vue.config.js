@@ -30,5 +30,7 @@ module.exports = defineConfig({
       patterns: [path.resolve(__dirname, "src/style/index.less")] // 引入全局样式变量
     },
   }, // 插件配置项
-
+  chainWebpack: config => {
+    config.resolve.alias.set('vue-i18n', 'vue-i18n/dist/vue-i18n.cjs.js')
+  }
 })

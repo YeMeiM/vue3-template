@@ -66,4 +66,4 @@ Date.prototype.format = function (format): string {
 
 
 
-export {}
+export { }

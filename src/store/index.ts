@@ -21,6 +21,12 @@ const store = createStore({
   },
   mutations: {
     /**
+     * 设置app版本号
+     */
+    SET_APP_VERSION(state, version: string) {
+      state.version = version;
+    },
+    /**
      * 设置用户token，如果传入空，则删除token
      * @param state store.state
     * @param token 用户Token

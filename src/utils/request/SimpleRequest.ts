@@ -1,6 +1,4 @@
-import axios, {AxiosError, AxiosResponse, Method} from 'axios';
-
-const qs = require("qs")
+import axios, { AxiosError, AxiosResponse, Method } from 'axios';
 
 /**
  * 请求默认配置项
@@ -145,6 +143,11 @@ export interface SimpleRequestInitConfig<T = any> {
    * 是否使用FormData请求
    */
   isFormData?: boolean;
+
+  /**
+   * 请求失败处理器
+   */
+  errorHandler?: (err: any) => any;
 }
 
 /**
@@ -184,7 +187,7 @@ export class SimpleRequest<T = { [name: string]: any }> {
   request(cfg: string | SimpleRequestMore<T> = "/"): Promise<any> {
     return new Promise((resolve, reject) => {
       // 设置默认请求配置
-      if(this.config.beforeInitRequest){
+      if (this.config.beforeInitRequest) {
         cfg = this.config.beforeInitRequest(cfg);
       }
       const opt = this._setDefRequestConfig(cfg);
@@ -225,7 +228,7 @@ export class SimpleRequest<T = { [name: string]: any }> {
 
     // 如果是字符串，表示时=是地址，放进对象里，方便下面使用
     if (typeof opt === "string") {
-      opt = {url: opt} as SimpleRequestMore<T>
+      opt = { url: opt } as SimpleRequestMore<T>
     }
 
     // 没有设置method属性，设置为GET请求
@@ -265,21 +268,21 @@ export class SimpleRequest<T = { [name: string]: any }> {
       }
     }
 
-    // 如果需要使用formData格式，并且数据为对象，并且数据不是FormData格式
     if (opt.isFormData) {
-      // 文件类型
-      if (opt.data instanceof File) {
-        const formData = new FormData();
-        formData.append("data", opt.data)
-        opt.data = formData;
-      }
-      // 对象，但不是formData
-      else if (typeof opt.data === "object" && !SimpleRequest.isFormData(opt.data)) {
-        // 将数据设置为FormData格式
+      // 如果需要使用formData格式，并且数据为对象，并且数据不是FormData格式
+      if (typeof opt.data === "object" && !SimpleRequest.isFormData(opt.data)) {
         opt.headers = opt.headers ?? {};
         opt.headers["Content-Type"] = "application/x-www-form-urlencoded";
-        opt.data = qs.stringify(opt.data);
+        const formData = new FormData();
+        for (const k in opt.data) {
+          formData.append(k, opt.data[k])
+        }
+        opt.data = formData;
       }
+      // else if (typeof opt.data === "object" && !SimpleRequest.isFormData(opt.data)) {
+      //   // 将数据设置为FormData格式
+      //   opt.data = qs.stringify(opt.data);
+      // }
     }
 
     // 如果不是一个正常的链接，并且设置了基本请求地址
@@ -319,6 +322,15 @@ export class SimpleRequest<T = { [name: string]: any }> {
       console.error("error -> 网络请求失败，请检查请求地址或请求参数信息");
       reject(error)
     } else if (error.response.status !== 200) {
+      if (this.config.errorHandler) {
+        const result = this.config.errorHandler(error);
+        if (result) {
+          this._onErrorTips(error.message, opt.tips)
+          reject(result);
+          return;
+        }
+      }
+
       // 有返回值，且请求失败
       let message;
       switch (error.response.status) {

@@ -15,29 +15,67 @@
 import { onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { _uu } from "@/utils/func";
+import { useStore } from "vuex";
+import { Toast } from "vant";
 
 const router = useRouter();
+const store = useStore();
 const showLoading = ref(false);
-/**
- * 用来更新页面标题的方法
- */
-function updateDocumentTitle(append?: string) {
-  let arr = [];
-  if (process.env.VUE_APP_NAME) {
-    arr.push(process.env.VUE_APP_NAME);
-  }
-  if (router.currentRoute.value.meta.title) {
-    arr.push(router.currentRoute.value.meta.title);
-  }
-  if (typeof append === "string") {
-    arr.push(append);
-  }
-  document.title = arr.join(" - ");
-  arr = null;
-}
 
 // 加载状态
 let loadingCount = 0;
+
+window.changeversion = function checkAppUpdate(verNum: string | number) {
+  verNum = verNum.toString();
+  store.commit(
+    "SET_APP_VERSION",
+    `${verNum.substring(0, verNum.length - 2)}.${verNum[verNum.length - 2]}.${
+      verNum[verNum.length - 1]
+    }`
+  );
+  _uu
+    .req({
+      module: "Utils",
+      interface: "1002",
+      data: {
+        platform: 1,
+        version: store.state.version,
+      },
+      tips: false,
+      loading: false,
+    })
+    .then((res) => {
+      if (res.needUpgrade) {
+        // 如果没有android原生交互对象
+        if (!window.test) {
+          // 报错，会被catch捕捉
+          throw new Error("未找到android原生交互对象");
+        }
+
+        /**
+         * 调用android原生的更新方法
+         * 注：格式固定
+         */
+        window.test.version(
+          JSON.stringify({
+            newVersion: res.newVersion.version,
+            VersionCode: res.newVersion.version.replace(/\./g, ""),
+            Version_force: res.newVersion.version,
+            VersionCode_force: res.newVersion.version.replace(/\./g, ""),
+            downurl: res.newVersion.apkUrl,
+            isUpdate: 1,
+            forceUpdate: res.newVersion.isForced,
+            updateDescription:
+              res.newVersion.updateDescription ?? "1、修复若干bug",
+          })
+        );
+      }
+    })
+    .catch((err) => {
+      console.log("检测更新失败", err);
+      Toast(err.message || "检测更新失败");
+    });
+};
 
 /**
  * 更新加载状态
@@ -52,17 +90,15 @@ function updateLoading(loading: boolean) {
 router.afterEach(function () {
   // 页面切换后将页面滚动到最顶部
   window.scrollTo(0, 0);
-  // 更新页面标题
-  updateDocumentTitle();
   loadingCount = 0;
   updateLoading(false);
 });
 
-_uu.$on("update:documentTitle", updateDocumentTitle);
+// 添加loading监听
 _uu.$on("update:loading", updateLoading);
 
 onUnmounted(function () {
-  _uu.$off("update:documentTitle", updateDocumentTitle);
+  // 去除监听
   _uu.$off("update:loading", updateLoading);
 });
 </script>
