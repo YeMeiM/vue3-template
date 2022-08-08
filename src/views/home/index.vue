@@ -1,31 +1,27 @@
 <template>
   <page title="标题" class="home" headerBorder is-back>
-    <button>按钮</button>
-    <div class="my-button">按钮</div>
+    <button>{{ count }}</button>
+    <van-button block class="my-button" v-move v-wait-event @click="onClick"
+      >按钮</van-button
+    >
   </page>
 </template>
 
-<script lang="ts">
-import { defineComponent, reactive, toRefs } from "vue";
+<script lang="ts" setup>
 import Page from "@/components/Page.vue";
+import { ref } from "vue";
 
-export default defineComponent({
-  components: { Page },
-  setup() {
-    const data = reactive({});
+const count = ref(0);
 
-    return {
-      ...toRefs(data),
-      appName: process.env.VUE_APP_NAME,
-    };
-  },
-});
+function onClick() {
+  count.value++;
+}
 </script>
 
 <style scoped lang="less">
-.page {
-  button {
-    border: 1px solid var(--border);
+.home {
+  .my-button {
+    border: 1px solid var(--s-border);
     padding: 10px;
   }
 }

@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, toRef, watch, } from "vue";
+import { defineComponent, ref, toRef, watch } from "vue";
 import { useRouter } from "vue-router";
 import { _uu } from "@/utils/func";
 
@@ -147,21 +147,21 @@ export default defineComponent({
 <style scoped lang="less">
 .header-bar-holder {
   &.holder-show {
-    height: var(--simple-header-bar-height);
+    height: var(--s-header-bar-height);
   }
 }
 
 .header-bar {
-  height: var(--simple-header-bar-height);
+  height: var(--s-header-bar-height);
   box-sizing: content-box;
   padding-top: var(--status-bar-height);
-  background: var(--simple-header-bar-background);
+  background: var(--s-header-bar-background);
   display: flex;
   align-items: center;
-  color: var(--simple-header-bar-color, @title);
+  color: var(--s-header-bar-color, var(--s-title));
 
   &.border-bar {
-    box-shadow: 0 0 0 1px var(--border);
+    box-shadow: 0 0 0 1px var(--s-border);
   }
 
   &.fix-bar {

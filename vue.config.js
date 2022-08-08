@@ -1,4 +1,4 @@
-const {defineConfig} = require('@vue/cli-service')
+const { defineConfig } = require('@vue/cli-service')
 const path = require("path");
 
 const proxy = {};
@@ -18,9 +18,13 @@ module.exports = defineConfig({
   outputDir: "dist", // 生成的生产环境构建文件的目录
   transpileDependencies: false, // 是否对依赖文件进行旧代码兼容 @see https://cli.vuejs.org/zh/config/#transpiledependencies
   configureWebpack: undefined, // webpack配置项
-  css: { // css 相关配置
-    loaderOptions: {}, // 向css相关的loader传递选项
-  },
+  // css: { // css 相关配置
+  //   loaderOptions: {
+  //     css: {
+  //       modules: true,
+  //     }
+  //   }, // 向css相关的loader传递选项
+  // },
   devServer: {
     proxy,
   },// 开发服务器
@@ -30,7 +34,5 @@ module.exports = defineConfig({
       patterns: [path.resolve(__dirname, "src/style/index.less")] // 引入全局样式变量
     },
   }, // 插件配置项
-  chainWebpack: config => {
-    config.resolve.alias.set('vue-i18n', 'vue-i18n/dist/vue-i18n.cjs.js')
-  }
+  chainWebpack: config => config.resolve.alias.set('vue-i18n', 'vue-i18n/dist/vue-i18n.cjs.js')
 })

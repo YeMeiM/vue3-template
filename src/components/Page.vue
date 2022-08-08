@@ -1,15 +1,15 @@
 <template>
   <div class="page-container page" :style="{ background }">
-    <slot name="header" >
+    <slot name="header">
       <HeaderBar
-      v-if="showHeader"
-      :title="title"
-      :is-back="isBack"
-      v-bind="headerAttr"
-      @clickLeft="$emit('clickLeft', $event)"
-      @clickRight="$emit('clickRight', $event)"
-      @dbClick="$emit('dbClick', $event)"
-    />
+        v-if="showHeader"
+        :title="title"
+        :is-back="isBack"
+        v-bind="headerAttr"
+        @clickLeft="$emit('clickLeft', $event)"
+        @clickRight="$emit('clickRight', $event)"
+        @dbClick="$emit('dbClick', $event)"
+      />
     </slot>
     <van-pull-refresh
       v-if="refresh"
@@ -41,12 +41,15 @@
         :loading="loading"
         :finished="finished"
       >
-      <p class="load-finished" v-if="finishedText" v-show="finished">
+        <p class="load-finished" v-if="finishedText" v-show="finished">
           {{ finishedText }}
         </p>
-        <van-loading v-show="!finished && loading" v-if="loadingText" type="spinner">{{
-          loadingText
-        }}</van-loading>
+        <van-loading
+          v-show="!finished && loading"
+          v-if="loadingText"
+          type="spinner"
+          >{{ loadingText }}</van-loading
+        >
       </slot>
     </div>
   </div>
@@ -277,24 +280,24 @@ export default defineComponent({
   z-index: 0;
   display: flex;
   flex-direction: column;
-  background: var(--page-background, @default);
+  background: var(--page-background, var(--s-default));
 
   .load-finished {
     text-align: center;
     padding: 10px 20px;
-    color: var(--page-holder-text-color, @holder);
+    color: var(--page-holder-text-color, var(--s-holder));
   }
 
   .van-loading {
     text-align: center;
     padding: 10px 20px;
     --van-loading-spinner-size: 22px;
-    --van-loading-text-color: var(--page-holder-text-color, @holder);
+    --van-loading-text-color: var(--page-holder-text-color, var(--s-holder));
   }
 
   .page-inner-container {
     flex: 1;
-    padding: var(--page-padding, 0)
+    padding: var(--page-padding, 0);
   }
 }
 </style>

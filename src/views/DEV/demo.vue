@@ -1,25 +1,21 @@
 <template>
-  <div class="demo">
-
-  </div>
+  <div class="demo"></div>
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, toRefs } from 'vue';
+import { defineComponent, reactive, toRefs } from "vue";
 
 export default defineComponent({
-  setup(){
-    const data = reactive({
-
-    })
+  setup() {
+    const data = reactive({});
 
     return {
       ...toRefs(data),
-    }
+    };
   },
-})
+  // mounted() {},/
+});
 </script>
 
 <style scoped lang="less">
-
 </style>

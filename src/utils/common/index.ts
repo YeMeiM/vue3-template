@@ -64,6 +64,4 @@ Date.prototype.format = function (format): string {
   return this.toLocaleString();
 }
 
-
-
 export { }

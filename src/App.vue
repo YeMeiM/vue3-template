@@ -46,11 +46,9 @@ window.changeversion = function checkAppUpdate(verNum: string | number) {
     })
     .then((res) => {
       if (res.needUpgrade) {
-        // 如果没有android原生交互对象
-        if (!window.test) {
-          // 报错，会被catch捕捉
-          throw new Error("未找到android原生交互对象");
-        }
+        // 如果没有android原生交互对象 报错，会被catch
+        if (!window.test) throw new Error("未找到android原生交互对象")
+          
 
         /**
          * 调用android原生的更新方法
@@ -123,7 +121,7 @@ html {
     font-size: 14px;
     margin: 0;
     font-family: PingFangSC-Regular, PingFang SC;
-    color: @base;
+    color: var(--s-basis);
 
     input {
       width: 100%;
@@ -154,9 +152,9 @@ html {
     align-items: center;
     justify-content: center;
     box-shadow: 0 0 20px rgba(black, 0.3);
-    --van-loading-spinner-size: 24px;
     padding: 20px 20px;
     backdrop-filter: blur(2px);
+    --van-loading-spinner-size: 24px;
   }
 }
 </style>

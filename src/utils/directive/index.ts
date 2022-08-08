@@ -1,6 +1,7 @@
-import {App} from "vue";
+import { App } from "vue";
 
-export function install(app: App){
+export function install(app: App) {
+  // v-move.auto 添加此指令后，使dom可以拖动
   app.directive("move", {
     mounted(el: HTMLElement, binding) {
       const p = {
@@ -48,6 +49,33 @@ export function install(app: App){
         window.addEventListener("touchmove", onDrag)
         window.addEventListener("touchend", onDragEnd)
       })
+    }
+  })
+
+  const defaultWaitTime = 2000;
+  const getEventListener = (waitTime: number) => {
+    let lastClickTime = 0;
+    return function (event: any) {
+      const now = new Date().getTime();
+      if (now - lastClickTime > waitTime) {
+        lastClickTime = now;
+      } else {
+        event.stopImmediatePropagation();
+      }
+    }
+  }
+
+  app.directive("wait-event", {
+    mounted(el, binding) {
+      console.log(el, binding);
+      let waitTime = Number(binding.value);
+      if (isNaN(waitTime)) waitTime = defaultWaitTime;
+      const keys = Object.keys(binding.modifiers);
+      if (keys.length == 0) {
+        el.addEventListener("click", getEventListener(waitTime), true);
+      } else {
+        keys.forEach(key => el.addEventListener(key, getEventListener(waitTime), true));
+      }
     }
   })
 }
