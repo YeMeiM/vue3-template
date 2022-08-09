@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, onUnmounted, PropType, reactive, toRefs} from 'vue';
+import { defineComponent, onUnmounted, PropType, reactive, toRefs } from "vue";
 
 export interface SimpleCodeApi {
   /**
@@ -32,14 +32,14 @@ export interface SimpleCodeApi {
  * @param api 被校验的参数
  */
 export function isSimpleCodeApi(api: unknown): api is SimpleCodeApi {
-  if (typeof api !== "object") {
-    return false;
-  }
+  if (typeof api !== "object") return false;
   const anyApi = api as any;
-  return typeof anyApi.start === "function"
-      && typeof anyApi.end === "function"
-      && typeof anyApi.lock === "function"
-      && typeof anyApi.unlock === "function";
+  return (
+    typeof anyApi.start === "function" &&
+    typeof anyApi.end === "function" &&
+    typeof anyApi.lock === "function" &&
+    typeof anyApi.unlock === "function"
+  );
 }
 
 export default defineComponent({
@@ -72,7 +72,7 @@ export default defineComponent({
      * 事件处理器
      */
     handler: {
-      type: Function as PropType<() => (Promise<void> | boolean)>
+      type: Function as PropType<() => Promise<void> | boolean>,
     },
     /**
      * 是否禁用
@@ -80,15 +80,14 @@ export default defineComponent({
     disabled: {
       type: Boolean,
       default: false,
-    }
+    },
   },
   setup(props, ctx) {
     let timer = NaN;
     let doing = false;
     const data = reactive({
       time: 0,
-    })
-
+    });
 
     function lock() {
       doing = true;
@@ -110,40 +109,33 @@ export default defineComponent({
       data.time = Number(props.duration);
       timer = window.setInterval(function () {
         data.time--;
-        if (data.time <= 0) {
-          end();
-          ctx.emit("finished");
-        }
-      }, 1000)
+        if (data.time > 0) return;
+        end();
+        ctx.emit("finished");
+      }, 1000);
     }
 
     function onClick() {
-      if (doing || props.disabled) {
-        return;
-      }
+      if (doing || props.disabled) return;
       // console.log("click")
       if (props.handler) {
         doing = true;
-        const result = props.handler()
-        if (result instanceof Promise) {
-          result.then(start);
-        } else if (result) {
-          start();
-        }
+        const result = props.handler();
+        if (result instanceof Promise) result.then(start);
+        else if (result) start();
       }
-      ctx.emit("click", {start, end, lock, unlock,});
+      ctx.emit("click", { start, end, lock, unlock });
     }
 
-    onUnmounted(end)
+    onUnmounted(end);
 
     return {
       ...toRefs(data),
       onClick,
-    }
+    };
   },
-})
+});
 </script>
 
 <style scoped lang="less">
-
 </style>

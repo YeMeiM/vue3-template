@@ -1,28 +1,28 @@
 <template>
   <page title="标题" class="home" headerBorder is-back>
-    <button>{{ count }}</button>
-    <van-button block class="my-button" v-move v-wait-event @click="onClick"
-      >按钮</van-button
-    >
+    <div class="qrcode-container">
+      <simple-qrcode :value="value" margin="10" />
+    </div>
   </page>
 </template>
 
 <script lang="ts" setup>
+import SimpleQrcode from "@/components/SimpleQrcode.vue";
 import Page from "@/components/Page.vue";
 import { ref } from "vue";
 
-const count = ref(0);
-
-function onClick() {
-  count.value++;
-}
+const value = ref("二维码");
 </script>
 
 <style scoped lang="scss">
 .home {
-  .my-button {
-    border: 1px solid var(--s-border);
-    padding: 10px;
+  overflow: hidden;
+
+  .simple-qrcode {
+    width: 200px;
+    box-shadow: 0 0 0 1px #ccc;
+    display: block;
+    margin: 50px auto;
   }
 }
 </style>
