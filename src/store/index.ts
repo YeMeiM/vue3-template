@@ -28,14 +28,9 @@ const store = createStore({
     SET_USER_TOKEN(state, token?: string) {
       // state.user = !user || user.startsWith("Bearer") ? user ?? "" : `Bearer ${user}`;
       state.token = token ?? "";
-      if (process.env.VUE_APP_TOKEN_LOCAL_SAVE !== "true") {
-        return
-      }
-      if (token) {
-        localStorage.setItem(USER_TOKEn_NAME, token)
-      } else {
-        localStorage.removeItem(USER_TOKEn_NAME);
-      }
+      if (process.env.VUE_APP_TOKEN_LOCAL_SAVE !== "true") return;
+      if (token) localStorage.setItem(USER_TOKEn_NAME, token)
+      else localStorage.removeItem(USER_TOKEn_NAME)
     },
   },
   actions: {},

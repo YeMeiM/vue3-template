@@ -3,7 +3,7 @@ import useClipboard from 'vue-clipboard3'
 import { Dialog } from "vant/lib/dialog"
 import { getCurrentInstance } from "vue";
 import { simpleRequest } from "@/utils/request"
-import * as verification from "@/utils/common/verification";
+import * as verification from "@/utils/func/verification";
 
 export class SimpleUtils extends SimpleEventHandler {
 
@@ -120,9 +120,7 @@ export class SimpleUtils extends SimpleEventHandler {
    */
   getBox(name: string): any {
     const value = localStorage.getItem(`${SimpleUtils.UU_STORE_NAME}_${name}`);
-    if (!value) {
-      return null;
-    }
+    if (!value) return null;
     return JSON.parse(value).data;
   }
 
@@ -134,25 +132,6 @@ export class SimpleUtils extends SimpleEventHandler {
     localStorage.removeItem(`${SimpleUtils.UU_STORE_NAME}_${name}`)
   }
 }
-
-// /**
-//  * 上传一群文件
-//  * @param fileList 文件列表
-//  * @returns 上传后的文件地址列表
-//  */
-// export async function uploadFileList(fileList: Array<File>): Promise<string[]> {
-//   const formData = new FormData();
-//   for (const i in fileList) formData.append(`data${i}`, fileList[i]);
-//   const res = await simpleRequest.request({
-//     url: "/upload",
-//     method: "POST",
-//     isFormData: true,
-//     data: formData,
-//     isModule: true,
-//     enc: process.env.VUE_APP_ENC === "true",
-//   })
-//   return Object.keys(res).map(k => (res as any)[k]);
-// }
 
 /**
  * 上传一群文件
@@ -187,13 +166,10 @@ export async function uploadFile(file: File | Array<File>): Promise<string | str
     data: formData,
     isModule: true,
     enc: process.env.VUE_APP_ENC === "true",
-  })
+  });
 
-  if (file instanceof File) {
-    return res.data;
-  } else {
-    return Object.keys(res).map(k => (res as any)[k]);
-  }
+  if (file instanceof File) return res.data;
+  else return Object.keys(res).map(k => (res as any)[k]);
 }
 
 export const _uu = SimpleUtils.init({
@@ -213,8 +189,6 @@ export const _uu = SimpleUtils.init({
 
 export function useUU(): SimpleUtils {
   const instance = getCurrentInstance();
-  if (!instance) {
-    throw new Error("未找到应用实例，可能不是在setup内调用？")
-  }
+  if (!instance) throw new Error("未找到应用实例，可能不是在setup内调用？");
   return instance.appContext.config.globalProperties.$uu;
 }

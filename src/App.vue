@@ -22,10 +22,8 @@ const router = useRouter();
 const store = useStore();
 const showLoading = ref(false);
 
-// 加载状态
-let loadingCount = 0;
-
-window.changeversion = function checkAppUpdate(verNum: string | number) {
+// 添加自动更新事件
+window.changeversion = function (verNum: string | number) {
   verNum = verNum.toString();
   store.commit(
     "SET_APP_VERSION",
@@ -47,13 +45,8 @@ window.changeversion = function checkAppUpdate(verNum: string | number) {
     .then((res) => {
       if (res.needUpgrade) {
         // 如果没有android原生交互对象 报错，会被catch
-        if (!window.test) throw new Error("未找到android原生交互对象")
-          
-
-        /**
-         * 调用android原生的更新方法
-         * 注：格式固定
-         */
+        if (!window.test) throw new Error("未找到android原生交互对象");
+        //调用android原生的更新方法 注：格式固定
         window.test.version(
           JSON.stringify({
             newVersion: res.newVersion.version,
@@ -75,29 +68,24 @@ window.changeversion = function checkAppUpdate(verNum: string | number) {
     });
 };
 
-/**
- * 更新加载状态
- * @param loading 是否加载中
- */
-function updateLoading(loading: boolean) {
-  loadingCount += loading ? 1 : -1;
-  showLoading.value = loadingCount > 0;
-}
-
 // 处理页面切换的回调
 router.afterEach(function () {
   // 页面切换后将页面滚动到最顶部
   window.scrollTo(0, 0);
-  loadingCount = 0;
-  updateLoading(false);
 });
 
+// 加载状态
+let loadingCount = 0;
+
 // 添加loading监听
-_uu.$on("update:loading", updateLoading);
+const loadingKey = _uu.$on("update:loading", (loading: boolean) => {
+  loadingCount += loading ? 1 : -1;
+  showLoading.value = loadingCount > 0;
+});
 
 onUnmounted(function () {
   // 去除监听
-  _uu.$off("update:loading", updateLoading);
+  _uu.$off("update:loading", loadingKey);
 });
 </script>
 
@@ -123,7 +111,8 @@ html {
     font-family: PingFangSC-Regular, PingFang SC;
     color: var(--s-basis);
 
-    input {
+    input,
+    textarea {
       width: 100%;
       flex: 1;
       outline: none;

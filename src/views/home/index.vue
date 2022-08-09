@@ -18,7 +18,7 @@ function onClick() {
 }
 </script>
 
-<style scoped lang="less">
+<style scoped lang="scss">
 .home {
   .my-button {
     border: 1px solid var(--s-border);

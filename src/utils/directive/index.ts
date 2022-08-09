@@ -67,7 +67,6 @@ export function install(app: App) {
 
   app.directive("wait-event", {
     mounted(el, binding) {
-      console.log(el, binding);
       let waitTime = Number(binding.value);
       if (isNaN(waitTime)) waitTime = defaultWaitTime;
       const keys = Object.keys(binding.modifiers);

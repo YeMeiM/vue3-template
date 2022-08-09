@@ -1,9 +1,13 @@
-export type EventListener = (val: any) => any;
+type EventListener = (...val: any[]) => any;
 
-export interface EventListenerBox {
+interface EventListenerBox {
   key: number;
   listener: EventListener;
   once?: boolean;
+}
+
+interface WaitEvent {
+  value: any[],
 }
 
 export class SimpleEventHandler {
@@ -11,7 +15,7 @@ export class SimpleEventHandler {
    * 监听器对象
    * @private
    */
-  private _listeners: Map<string, Array<EventListenerBox>> = new Map();
+  private _listeners: Map<string, Array<EventListenerBox> | WaitEvent> = new Map();
   /**
    * 监听器对象唯一索引值
    * @private
@@ -33,14 +37,28 @@ export class SimpleEventHandler {
    * @return 事件处理器添加完成后的唯一key值，可用它销毁事件监听
    */
   $on(name: string, listener: EventListener, once = false): number {
+    let listeners: EventListenerBox[] | WaitEvent;
+    // 不存在，添加一个空数组
     if (!this._listeners.has(name)) {
-      this._listeners.set(name, []);
+      listeners = [];
+      this._listeners.set(name, listeners);
+    } else {
+      // 存在，从监听器里面取出来
+      listeners = this._listeners.get(name);
+      // 不是数组，就是等待事件
+      if (!Array.isArray(listeners)) {
+        // 调用等待时间
+        listener(...listeners.value);
+        // 如果是仅一次，调用完成后不需要再绑定事件
+        if (once) return 0;
+        // 不是仅一次，将此次事件继续添加到监听器里面
+        listeners = [];
+        this._listeners.set(name, listeners);
+      }
     }
-    this._listeners.get(name).push({
-      listener,
-      key: this._lisKey,
-      once,
-    })
+    // 添加一个监听器盒子
+    listeners.push({ listener, key: this._lisKey, once, })
+    // 返回唯一key值
     return this._lisKey++;
   }
 
@@ -69,15 +87,18 @@ export class SimpleEventHandler {
       // 根据对应key的类型拿到需要销毁的索引
       const key = typeof listener === "number" ? 'key' : 'listener';
       const listeners = this._listeners.get(name);
-      const index = listeners.findIndex(item => item[key] === listener);
-      // 如果被查到的这个就是最后一条，直接删除
-      if (index >= 0 && listeners.length === 1) {
+      // 不是数组，等待事件直接删掉
+      if (!Array.isArray(listeners)) {
         this._listeners.delete(name);
+      } else {
+        // 数组，删掉对应的监听器
+        const index = listeners.findIndex(item => item[key] === listener);
+        // 如果是最后一条，直接删除
+        if (index >= 0 && listeners.length === 1) this._listeners.delete(name)
+        // 不然就只删这一条
+        else listeners.splice(index, 1)
       }
-      // 不然就只删这一条
-      else {
-        listeners.splice(index, 1)
-      }
+
     }
   }
 
@@ -87,19 +108,33 @@ export class SimpleEventHandler {
    * @param value 事件数据
    * @param callback 回调
    */
-  $emit(name: string, value?: any, callback?: () => void): void {
+  $emit(name: string, ...value: any[]): void {
     if (this._listeners.has(name)) {
-      for (const lisBox of this._listeners.get(name)) {
+      const listeners = this._listeners.get(name);
+      if (!Array.isArray(listeners)) throw new Error("此事件为等待事件，无法通过[emit]触发");
+
+      for (const lisBox of listeners) {
         try {
-          lisBox.listener(value);
-        } catch (e) {
-          console.error(e);
-        }
-        if (lisBox.once) {
-          this.$off(name, lisBox.key);
-        }
+          lisBox.listener(...value);
+        } catch (e) { console.error(e) }
+        if (lisBox.once) this.$off(name, lisBox.key);
       }
     }
-    callback && callback();
+  }
+
+  /**
+   * 等到对应事件绑定时直接触发绑定的监听器，只触发一次，
+   * 建议使用[once]方法，如果使用[on]方法，需要手动调用[off]方法销毁事件监听
+   * @param name 事件名称
+   * @param value 事件参数
+   */
+  $wait(name: string, ...value: any[]): void {
+    if (this._listeners.has(name)) {
+      const listeners = this._listeners.get(name);
+      if (Array.isArray(listeners)) throw new Error("此事件已被监听器占用，无法使用[wait]");
+      listeners.value = value;
+    } else {
+      this._listeners.set(name, { value: value });
+    }
   }
 }

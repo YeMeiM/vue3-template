@@ -31,7 +31,6 @@ export const simpleRequest = new SimpleRequest<Partial<SimpleRequestEnc>>({
     }
   },
   beforeInitRequest(opt) {
-  
     if (typeof opt === "object") {
       if (opt.module && opt.interface) {
         opt.isModule = true;
