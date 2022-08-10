@@ -8,7 +8,7 @@
 <script lang="ts">
 import { defineComponent, onUnmounted, PropType, reactive, toRefs } from "vue";
 
-export interface SimpleCodeApi {
+export interface SimpleCodeInstance {
   /**
    * 开始倒计时
    */
@@ -27,27 +27,12 @@ export interface SimpleCodeApi {
   unlock: () => void;
 }
 
-/**
- * 参数是否是SimpleCodeApi
- * @param api 被校验的参数
- */
-export function isSimpleCodeApi(api: unknown): api is SimpleCodeApi {
-  if (typeof api !== "object") return false;
-  const anyApi = api as any;
-  return (
-    typeof anyApi.start === "function" &&
-    typeof anyApi.end === "function" &&
-    typeof anyApi.lock === "function" &&
-    typeof anyApi.unlock === "function"
-  );
-}
-
 export default defineComponent({
   emits: {
     /**
      * 点击组件
      */
-    click: isSimpleCodeApi,
+    click: null,
     /**
      * 倒计时结束
      */
@@ -89,13 +74,8 @@ export default defineComponent({
       time: 0,
     });
 
-    function lock() {
-      doing = true;
-    }
-
-    function unlock() {
-      doing = false;
-    }
+    const lock = () => (doing = true);
+    const unlock = () => (doing = false);
 
     function end() {
       unlock();
@@ -126,6 +106,13 @@ export default defineComponent({
       }
       ctx.emit("click", { start, end, lock, unlock });
     }
+
+    ctx.expose({
+      start,
+      end,
+      lock,
+      unlock,
+    });
 
     onUnmounted(end);
 
