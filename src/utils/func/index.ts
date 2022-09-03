@@ -51,14 +51,15 @@ export class SimpleUtils extends SimpleEventHandler {
    * @param el 需要被转换的元素
    * @param ignoreElements 此方法会分别传入不同的元素，如果返回true，那么该元素将被忽略
    */
-  toImage(el: HTMLElement, ignoreElements?: (el: HTMLElement) => boolean): Promise<string> {
+  async toImage(el: HTMLElement, ignoreElements?: (el: HTMLElement) => boolean): Promise<string> {
     if (!SimpleUtils.html2canvas) SimpleUtils.html2canvas = require("html2canvas");
-    return new Promise(resolve => SimpleUtils.html2canvas(el, {
+    const canvas = await SimpleUtils.html2canvas(el, {
       allowTaint: true,
       useCORS: true,
       ignoreElements,
       logging: process.env.NODE_ENV === "development",
-    }).then((canvas: HTMLCanvasElement) => resolve(canvas.toDataURL("image/png"))))
+    })
+    return canvas.toDataURL("image/png");
   }
 
   /**
@@ -93,12 +94,8 @@ export class SimpleUtils extends SimpleEventHandler {
    * @param text
    */
   copyText(text: string): Promise<void> {
-    if (!text) {
-      return Promise.reject(new Error("被复制的文字不得为空"))
-    }
-    if (!SimpleUtils.clipboard) {
-      SimpleUtils.clipboard = useClipboard();
-    }
+    if (!text) return Promise.reject(new Error("被复制的文字不得为空"))
+    if (!SimpleUtils.clipboard) SimpleUtils.clipboard = useClipboard();
     return SimpleUtils.clipboard.toClipboard(text)
   }
 
