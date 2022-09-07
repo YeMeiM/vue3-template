@@ -99,9 +99,9 @@ export default defineComponent({
       if (doing || props.disabled) return;
       // console.log("click")
       if (props.handler) {
-        doing = true;
+        lock();
         const result = props.handler();
-        if (result instanceof Promise) result.then(start);
+        if (result instanceof Promise) result.then(start).catch(unlock);
         else if (result) start();
       }
       ctx.emit("click", { start, end, lock, unlock });
