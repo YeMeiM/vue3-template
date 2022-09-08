@@ -10,7 +10,14 @@ const routes: Array<RouteRecordRaw> = [
 // 创建路由并保存路由对象
 const router = createRouter({
   history: createWebHashHistory(),
-  routes
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { left: 0, top: 0, behavior: "auto" }
+    }
+  }
 })
 
 // 路由拦截忽略
