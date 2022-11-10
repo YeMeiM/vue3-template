@@ -1,10 +1,10 @@
-import {SimpleRequest} from "./SimpleRequest"
-import {App} from "vue";
-import {SimpleEnCryptor} from "./encrypter"
+import { SimpleRequest } from "./SimpleRequest"
+import { App } from "vue";
+import { SimpleEnCryptor } from "./encrypter"
 import router from "@/router";
 import store from "@/store";
-import {Toast} from "vant";
-import {_uu} from "@/utils/func";
+import { Toast } from "vant";
+import { _uu } from "@/utils/func";
 
 interface SimpleRequestEnc {
   module: string;
@@ -14,6 +14,7 @@ interface SimpleRequestEnc {
   isModule: boolean;
 }
 
+const reqLog = !!localStorage.getItem("REQUEST_LOG");
 const simpleEnc = new SimpleEnCryptor(process.env.VUE_APP_ENC_AES_KEY, process.env.VUE_APP_ENC_APP_KEY);
 
 export const simpleRequest = new SimpleRequest<Partial<SimpleRequestEnc>>({
@@ -48,11 +49,13 @@ export const simpleRequest = new SimpleRequest<Partial<SimpleRequestEnc>>({
         store.state.token && (opt.headers['Authorization'] = store.state.token);
       }
     }
+    if (reqLog) console.log("request ->", opt);
     return opt;
   },
   afterRequestHandler(res, opt) {
     if (opt.isModule) {
       const data = opt.enc ? simpleEnc.aesDecrypt(res.data.encryptedData) : res.data;
+      if (reqLog) console.log("response ->", data)
       switch (data.code) {
         case 0:
           return data.data ?? data;
