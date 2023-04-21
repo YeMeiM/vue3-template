@@ -13,12 +13,10 @@
 
 <script lang="ts" setup>
 import { onUnmounted, ref } from "vue";
-import { useRouter } from "vue-router";
 import { _uu } from "@/utils/func";
 import { useStore } from "vuex";
 import { Toast } from "vant";
 
-const router = useRouter();
 const store = useStore();
 const showLoading = ref(false);
 
@@ -67,12 +65,6 @@ window.changeversion = function (verNum: string | number) {
       Toast(err.message || "检测更新失败");
     });
 };
-
-// 处理页面切换的回调
-router.afterEach(function () {
-  // 页面切换后将页面滚动到最顶部
-  window.scrollTo(0, 0);
-});
 
 // 加载状态
 let loadingCount = 0;
