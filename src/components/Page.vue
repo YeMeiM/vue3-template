@@ -203,7 +203,7 @@ export default defineComponent({
 
     function onLoad() {
       if (!props.loading && !props.finished) {
-        console.log("load -list");
+        // console.log("load -list");
         ctx.emit("update:loading", true);
         ctx.emit("load");
       }

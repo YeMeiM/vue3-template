@@ -6,6 +6,7 @@ import { toRef, watch } from "vue";
 const USER_LANG_NAME = "USER_LANG";
 
 export const i18n = createI18n({
+  legacy: false,
   locale: localStorage.getItem(USER_LANG_NAME) || "zh",
   messages: {
     zh,

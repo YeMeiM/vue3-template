@@ -1,4 +1,4 @@
-import { isRef, reactive, ref, Ref } from "vue";
+import {isRef, reactive, ref, Ref} from "vue";
 
 export interface LoadListForm {
   lastId: number;
@@ -60,11 +60,11 @@ export interface LoadListOption<T, L = any> {
   handler: LoadHandler<T, L>
 }
 
-export type LoadHandler<T, L> = (form: T & LoadListForm) => Promise<LoadListDataType<L>>;
+export type LoadHandler<T, L> = (form: T & LoadListForm) => Promise<LoadListDataType<L> | L[]>;
 
 function getLBox(lBox?: Partial<LBox>): LBox {
   if (!lBox) {
-    return reactive({ loading: false, finished: false, error: false, })
+    return reactive({loading: false, finished: false, error: false,})
   }
   lBox.finished === undefined && (lBox.finished = false);
   lBox.loading === undefined && (lBox.loading = false);
@@ -75,7 +75,7 @@ function getLBox(lBox?: Partial<LBox>): LBox {
 
 function getForm<T>(form?: T): T & LoadListForm {
   if (!form) {
-    return { lastId: 0, page: 1 } as any;
+    return {lastId: 0, page: 1} as any;
   } else {
     if ((form as any).lastId === undefined) {
       (form as any).lastId = 0;
@@ -87,8 +87,10 @@ function getForm<T>(form?: T): T & LoadListForm {
   }
 }
 
-function getOpt<T, L>(opt: LoadHandler<T, L> | (Must<Partial<LoadListOption<T, L>>, "handler">)): LoadListOption<T & LoadListForm, L> & { list: Ref<L[]> } {
-  const result: any = typeof opt === "function" ? { handler: opt } : opt;
+function getOpt<T, L>(opt: LoadHandler<T, L> | (Must<Partial<LoadListOption<T, L>>, "handler">)): LoadListOption<T & LoadListForm, L> & {
+  list: Ref<L[]>
+} {
+  const result: any = typeof opt === "function" ? {handler: opt} : opt;
   result.lBox = getLBox(result.lBox);
   result.form = getForm(result.form);
   result.list = (result.list ? isRef(result.list) ? result.list : ref(result.list) : ref([]));
@@ -101,15 +103,20 @@ function getOpt<T, L>(opt: LoadHandler<T, L> | (Must<Partial<LoadListOption<T, L
  */
 export function onLoadList<T = {}, L = any>(options: LoadHandler<T, L> | (Must<Partial<LoadListOption<T, L>>, "handler">)) {
   const opt = getOpt(options)
+  const response = ref({}) as Ref<LoadListDataType<L>>;
 
-  const onRequestSuccess = (res: LoadListDataType<L>) => {
+  const onRequestSuccess = (res: LoadListDataType<L> | L[]) => {
+    if (Array.isArray(res)) res = {lastId: 0, currentPage: 1, lastPage: 1, list: res};
     opt.print && console.log(typeof opt.print === "string" ? `${opt.print} ->` : 'list ->', res);
     opt.afterResponse && opt.afterResponse(res);
+    response.value = res;
     opt.form.lastId = res.lastId;
     opt.form.page++;
     opt.list.value = opt.list.value.concat(res.list);
     opt.lBox.loading = false;
-    if (res.currentPage >= res.lastPage) {
+    if (res.currentPage === undefined ||
+        res.lastPage === undefined ||
+        res.currentPage >= res.lastPage) {
       opt.lBox.finished = true;
     }
   }
@@ -154,6 +161,10 @@ export function onLoadList<T = {}, L = any>(options: LoadHandler<T, L> | (Must<P
     /**
      * 调用此方法，重置页数后加载一次列表
      */
-    onRefresh
+    onRefresh,
+    /**
+     * 请求响应后的数据
+     */
+    response,
   }
 }

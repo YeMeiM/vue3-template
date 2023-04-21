@@ -111,7 +111,6 @@ export default defineComponent({
         }
         // 右侧按钮
         else {
-          console.log("right");
           url = props.rightUrl;
           ctx.emit("clickRight", (): void => (url = undefined));
         }

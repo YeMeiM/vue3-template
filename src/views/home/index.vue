@@ -1,9 +1,9 @@
 <template>
-  <page title="标题" class="home" headerBorder is-back>
+  <Page title="标题" class="home" headerBorder is-back>
     <div class="qrcode-container">
-      <simple-qrcode :value="value" margin="10" />
+      <SimpleQrcode :value="value" margin="10" />
     </div>
-  </page>
+  </Page>
 </template>
 
 <script lang="ts" setup>

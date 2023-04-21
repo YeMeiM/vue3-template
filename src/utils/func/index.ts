@@ -1,8 +1,8 @@
-import { SimpleEventHandler } from "@/utils/event";
+import {SimpleEventHandler} from "@/utils/event";
 import useClipboard from 'vue-clipboard3'
-import { Dialog } from "vant/lib/dialog"
-import { getCurrentInstance } from "vue";
-import { simpleRequest } from "@/utils/request"
+import {Dialog} from "vant/lib/dialog"
+import {getCurrentInstance} from "vue";
+import {simpleRequest} from "@/utils/request"
 import * as verification from "@/utils/func/verification";
 
 export class SimpleUtils extends SimpleEventHandler {
@@ -24,7 +24,11 @@ export class SimpleUtils extends SimpleEventHandler {
    * @param timeout 定时时间
    */
   sleep(timeout = 700): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, timeout))
+    return new Promise(function (resolve) {
+      setTimeout(function () {
+        resolve();
+      }, timeout)
+    })
   }
 
   /**
@@ -107,7 +111,7 @@ export class SimpleUtils extends SimpleEventHandler {
    * @param value 储蓄的值
    */
   saveBox(name: string, value: any): void {
-    localStorage.setItem(`${SimpleUtils.UU_STORE_NAME}_${name}`, JSON.stringify({ data: value, }))
+    localStorage.setItem(`${SimpleUtils.UU_STORE_NAME}_${name}`, JSON.stringify({data: value,}))
   }
 
   /**
