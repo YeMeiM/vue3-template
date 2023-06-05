@@ -1,4 +1,4 @@
-import {isRef, reactive, ref, Ref} from "vue";
+import {isRef, reactive, ref, Ref, shallowRef} from "vue";
 
 export interface LoadListForm {
   lastId: number;
@@ -48,46 +48,37 @@ export interface LoadListOption<T, L = any> {
    * 当请求响应后
    * @param res 响应后的数据
    */
-  afterResponse: (res: Expand<LoadListDataType<L>>) => void;
+  onAfterResponse: (res: Expand<LoadListDataType<L>>) => void;
   /**
    * 当重置请求之前
    * @param form
    */
-  beforeRefresh: (form: T & LoadListForm) => void;
+  onBeforeRefresh: (form: T & LoadListForm) => void;
   /**
    * 处理函数
    */
-  handler: LoadHandler<T, L>
+  onLoadList: LoadHandler<T, L>
 }
 
 export type LoadHandler<T, L> = (form: T & LoadListForm) => Promise<LoadListDataType<L> | L[]>;
 
 function getLBox(lBox?: Partial<LBox>): LBox {
-  if (!lBox) {
-    return reactive({loading: false, finished: false, error: false,})
-  }
+  if (!lBox) return reactive({loading: false, finished: false, error: false})
   lBox.finished === undefined && (lBox.finished = false);
   lBox.loading === undefined && (lBox.loading = false);
   lBox.error === undefined && (lBox.error = false);
-
   return lBox as LBox;
 }
 
 function getForm<T>(form?: T): T & LoadListForm {
-  if (!form) {
-    return {lastId: 0, page: 1} as any;
-  } else {
-    if ((form as any).lastId === undefined) {
-      (form as any).lastId = 0;
-    }
-    if ((form as any).page === undefined) {
-      (form as any).page = 1;
-    }
-    return (form as any);
-  }
+  if (!form) return {lastId: 0, page: 1} as any;
+  const anyForm = form as any;
+  if (anyForm.lastId === undefined) anyForm.lastId = 0;
+  if (anyForm.page === undefined) anyForm.page = 1;
+  return anyForm;
 }
 
-function getOpt<T, L>(opt: LoadHandler<T, L> | (Must<Partial<LoadListOption<T, L>>, "handler">)): LoadListOption<T & LoadListForm, L> & {
+function getOpt<T, L>(opt: LoadHandler<T, L> | (Must<Partial<LoadListOption<T, L>>, "onLoadList">)): LoadListOption<T & LoadListForm, L> & {
   list: Ref<L[]>
 } {
   const result: any = typeof opt === "function" ? {handler: opt} : opt;
@@ -101,14 +92,14 @@ function getOpt<T, L>(opt: LoadHandler<T, L> | (Must<Partial<LoadListOption<T, L
  * 一个简单的列表请求方法
  * @param options
  */
-export function onLoadList<T = {}, L = any>(options: LoadHandler<T, L> | (Must<Partial<LoadListOption<T, L>>, "handler">)) {
+export function onLoadList<T = {}, L = any>(options: LoadHandler<T, L> | (Must<Partial<LoadListOption<T, L>>, "onLoadList">)) {
   const opt = getOpt(options)
-  const response = ref({}) as Ref<LoadListDataType<L>>;
+  const response = shallowRef({}) as Ref<LoadListDataType<L>>;
 
   const onRequestSuccess = (res: LoadListDataType<L> | L[]) => {
     if (Array.isArray(res)) res = {lastId: 0, currentPage: 1, lastPage: 1, list: res};
     opt.print && console.log(typeof opt.print === "string" ? `${opt.print} ->` : 'list ->', res);
-    opt.afterResponse && opt.afterResponse(res);
+    opt.onAfterResponse && opt.onAfterResponse(res);
     response.value = res;
     opt.form.lastId = res.lastId;
     opt.form.page++;
@@ -125,20 +116,18 @@ export function onLoadList<T = {}, L = any>(options: LoadHandler<T, L> | (Must<P
     opt.lBox.error = true;
   }
 
-  const onLoad = () => {
-    opt.handler(opt.form).then(onRequestSuccess).catch(onRequestFail)
+  const loadList = () => {
+    opt.onLoadList(opt.form).then(onRequestSuccess).catch(onRequestFail)
   }
 
-  const onRefresh = () => {
+  const refreshList = () => {
     opt.list.value = [];
     opt.form.lastId = 0;
     opt.form.page = 1;
     opt.lBox.finished = false;
     opt.lBox.loading = true;
-    if (opt.beforeRefresh) {
-      opt.beforeRefresh(opt.form);
-    }
-    onLoad();
+    if (opt.onBeforeRefresh) opt.onBeforeRefresh(opt.form);
+    loadList();
   }
 
   return {
@@ -157,11 +146,11 @@ export function onLoadList<T = {}, L = any>(options: LoadHandler<T, L> | (Must<P
     /**
      * 调用此方法，加载一次列表
      */
-    onLoad,
+    loadList,
     /**
      * 调用此方法，重置页数后加载一次列表
      */
-    onRefresh,
+    refreshList,
     /**
      * 请求响应后的数据
      */
