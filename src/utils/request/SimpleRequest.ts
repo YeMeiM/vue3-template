@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosResponse, Method } from 'axios';
+import axios, {AxiosError, AxiosResponse, Method} from 'axios';
 
 /**
  * 请求默认配置项
@@ -165,6 +165,7 @@ type SimpleRequestMore<T> = SimpleRequestConfig & T;
  * 简单的请求对象
  */
 export class SimpleRequest<T = { [name: string]: any }> {
+  private $axios;
 
   /**
    * 请求初始化的配置项
@@ -178,42 +179,35 @@ export class SimpleRequest<T = { [name: string]: any }> {
    */
   constructor(opts: SimpleRequestInitConfig<T>) {
     this.config = Object.assign({}, opts, simpleRequestInitDefaultConfig)
+    this.$axios = axios.create({
+      baseURL: this.config.baseUrl,
+    })
   }
 
   /**
    * 请求
    * @param cfg
    */
-  request(cfg: string | SimpleRequestMore<T> = "/"): Promise<any> {
+  request<D = any>(cfg: string | SimpleRequestMore<T> = "/"): Promise<D> {
     return new Promise((resolve, reject) => {
       // 设置默认请求配置
-      if (this.config.beforeInitRequest) {
-        cfg = this.config.beforeInitRequest(cfg);
-      }
+      if (this.config.beforeInitRequest) cfg = this.config.beforeInitRequest(cfg);
       const opt = this._setDefRequestConfig(cfg);
       // 如果传入了loadingBox，这里展示loading
-      if (opt.loading && this.config.loadingBox) {
-        this.config.loadingBox.show();
-      }
+      if (opt.loading && this.config.loadingBox) this.config.loadingBox.show();
       // 发送请求
-      axios.request({
+      this.$axios.request({
         url: opt.url,
         method: opt.method,
-        headers: {
-          ...opt.headers,
-        },
+        headers: {...opt.headers},
         timeout: opt.timeout,
         [opt.isParams ? 'params' : 'data']: opt.data,
       }).then((response) => {
-        if (opt.loading && this.config.loadingBox) {
-          this.config.loadingBox.hide();
-        }
+        if (opt.loading && this.config.loadingBox) this.config.loadingBox.hide();
         // 请求成功处理
         this._onRequestSuccess(response, opt, resolve, reject)
       }).catch((error) => {
-        if (opt.loading && this.config.loadingBox) {
-          this.config.loadingBox.hide();
-        }
+        if (opt.loading && this.config.loadingBox) this.config.loadingBox.hide();
         // 请求失败处理
         this._onRequestError(error, opt, resolve, reject);
       })
@@ -227,56 +221,33 @@ export class SimpleRequest<T = { [name: string]: any }> {
   private _setDefRequestConfig(opt: SimpleRequestMore<T> | string): SimpleRequestRequireConfig {
 
     // 如果是字符串，表示时=是地址，放进对象里，方便下面使用
-    if (typeof opt === "string") {
-      opt = { url: opt } as SimpleRequestMore<T>
-    }
+    if (typeof opt === "string") opt = {url: opt} as SimpleRequestMore<T>
 
     // 没有设置method属性，设置为GET请求
-    if (!opt.method) {
-      opt.method = this.config.method;
-    }
+    if (!opt.method) opt.method = this.config.method;
 
     // method是get请求，设置isParams为true，表示将数据拼接到url好了
-    if (/^get$/i.test(opt.method) && typeof opt.data === "object") {
-      opt.isParams = true;
-    }
+    if (/^get$/i.test(opt.method) && typeof opt.data === "object") opt.isParams = true;
 
-    /**
-     * 如果未设置loading，或者loading不是布尔值
-     */
-    if (typeof opt.loading !== "boolean") {
-      // 设置loading为：如果loading是undefined则设置为true，否则设置为布尔值
-      opt.loading = opt.loading === undefined || Boolean(opt.loading);
-    }
+    // 如果未设置loading，或者loading不是布尔值
+    if (typeof opt.loading !== "boolean") opt.loading = opt.loading === undefined || Boolean(opt.loading);
 
     // 如果没有设置超时时间，使用全局配置的超时时间
-    if (typeof opt.timeout !== "number") {
-      opt.timeout = this.config.timeout;
-    }
+    if (typeof opt.timeout !== "number") opt.timeout = this.config.timeout;
 
     // 如果不是POST请求或者设置了formData
-    if (opt.isParams || !/^post$/i.test(opt.method)) {
-      // 不用formData
-      opt.isFormData = false;
-
-    }
+    if (opt.isParams || opt.method.toLowerCase() === 'post') opt.isFormData = false;
     // 如果传入的值不是布尔值
-    else {
-      // 如果未设置是否使用formData格式则设置为预设值，否则设置为布尔值
-      if (typeof opt.isFormData !== "boolean") {
-        opt.isFormData = opt.isFormData === undefined ? this.config.isFormData : Boolean(opt.isFormData);
-      }
-    }
-
+    // 如果未设置是否使用formData格式则设置为预设值，否则设置为布尔值
+    else if (typeof opt.isFormData !== "boolean") opt.isFormData = opt.isFormData === undefined ? this.config.isFormData : Boolean(opt.isFormData);
+    // 如果设置了使用formData格式，但是数据是普通对象
     if (opt.isFormData) {
       // 如果需要使用formData格式，并且数据为对象，并且数据不是FormData格式
       if (typeof opt.data === "object" && !SimpleRequest.isFormData(opt.data)) {
         opt.headers = opt.headers ?? {};
         opt.headers["Content-Type"] = "application/x-www-form-urlencoded";
         const formData = new FormData();
-        for (const k in opt.data) {
-          formData.append(k, opt.data[k])
-        }
+        for (const k in opt.data) formData.append(k, opt.data[k])
         opt.data = formData;
       }
       // else if (typeof opt.data === "object" && !SimpleRequest.isFormData(opt.data)) {
@@ -286,11 +257,8 @@ export class SimpleRequest<T = { [name: string]: any }> {
     }
 
     // 如果不是一个正常的链接，并且设置了基本请求地址
-    if (!/^https?::\/\//.test(opt.url) && this.config.baseUrl) {
-      opt.url = opt.url ? this.config.baseUrl + opt.url : this.config.baseUrl;
-    } else if (!opt.url) {
-      opt.url = "/";
-    }
+    if (!/^https?::\/\//.test(opt.url) && this.config.baseUrl) opt.url = opt.url ? this.config.baseUrl + opt.url : this.config.baseUrl;
+    else if (!opt.url) opt.url = "/";
 
     opt.tips = opt.tips ?? typeof this.config.errorTips === "function"
 

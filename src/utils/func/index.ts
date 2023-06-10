@@ -155,11 +155,8 @@ export function uploadFile(file: File): Promise<string>;
  */
 export async function uploadFile(file: File | Array<File>): Promise<string | string[]> {
   const formData = new FormData();
-  if (file instanceof File) {
-    formData.append("data", file);
-  } else {
-    for (const i in file) formData.append(`data${i}`, file[i]);
-  }
+  if (file instanceof File) formData.append("data", file);
+  else for (const i in file) formData.append(`data${i}`, file[i]);
   const res = await simpleRequest.request({
     url: "/upload",
     method: "POST",
@@ -168,9 +165,8 @@ export async function uploadFile(file: File | Array<File>): Promise<string | str
     isModule: true,
     enc: process.env.VUE_APP_ENC === "true",
   });
-
   if (file instanceof File) return res.data;
-  else return Object.keys(res).map(k => (res as any)[k]);
+  else return Object.keys(res).map(k => res[k]);
 }
 
 export const _uu = SimpleUtils.init({
