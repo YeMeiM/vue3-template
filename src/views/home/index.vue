@@ -1,17 +1,18 @@
 <template>
   <Page title="标题" class="home" headerBorder is-back>
     <div class="qrcode-container">
-      <SimpleQrcode :value="value" margin="10" />
+      <SimpleVideo :src="src" :poster="poster" />
     </div>
   </Page>
 </template>
 
 <script lang="ts" setup>
-import SimpleQrcode from "@/components/SimpleQrcode.vue";
 import Page from "@/components/Page.vue";
-import { ref } from "vue";
+import SimpleVideo from "@/components/SimpleVideo.vue";
 
-const value = ref("二维码");
+const src = "https://prod-streaming-video-msn-com.akamaized.net/b9614d22-e2ed-4689-becb-265d3d831c47/608d6881-b9a5-4ea9-aa8d-165bae3f43ec.mp4"
+const poster = "";
+
 </script>
 
 <style scoped lang="scss">

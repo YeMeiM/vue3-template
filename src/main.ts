@@ -21,3 +21,4 @@ declare module "@vue/runtime-core" {
 export const app = createApp(App)
 app.config.globalProperties.$uu = _uu;
 app.use(i18n).use(store).use(router).use(directiveInstall).use(Vant).mount('#app')
+
