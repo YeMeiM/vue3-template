@@ -1,6 +1,6 @@
 <template>
   <div class="simple-select" ref="elRef">
-    <van-popover v-model:show="open" @open="onOpenPopup" duration="0.2" >
+    <van-popover v-model:show="open" @open="onOpenPopup" duration="0.2">
       <template #reference>
         <div class="simple-select-input">
           <div class="simple-select-input-text">{{ current[label] }}</div>
@@ -60,14 +60,15 @@ function onChoose(index: number) {
   active.value = index;
   const value = current.value[props.value];
   emits("update:modelValue", value);
-  emits("change", value);
+  emits("change", value, current.value);
   open.value = false;
 }
 
 watchEffect(() => {
   const valueIndex = props.options.findIndex((item: any) => item[props.value] === props.modelValue);
-  if(valueIndex >= 0){
+  if (valueIndex >= 0) {
     active.value = valueIndex;
+    emits("change", props.modelValue, current.value);
   } else {
     onChoose(0);
   }
