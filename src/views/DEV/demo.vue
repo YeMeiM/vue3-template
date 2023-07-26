@@ -1,21 +1,24 @@
 <template>
-  <div class="demo"></div>
+  <div class="">
+
+  </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, reactive, toRefs } from "vue";
+<script type="text/ecmascript-6">
+import {defineComponent} from "vue";
 
 export default defineComponent({
-  setup() {
-    const data = reactive({});
-
-    return {
-      ...toRefs(data),
-    };
+  props: {
+    value: {
+      type: Boolean,
+    }
   },
-  // mounted() {},/
+  created() {
+    console.log(this.myProp)
+  }
 });
 </script>
 
 <style scoped lang="less">
+
 </style>

@@ -38,15 +38,15 @@ export const simpleRequest = new SimpleRequest<Partial<SimpleRequestEnc>>({
         !opt.url && (opt.url = "/portal");
         opt.method = "post";
         opt.isFormData = false;
+      }
+      if (opt.isModule) {
+        !opt.headers && (opt.headers = {});
+        store.state.token && (opt.headers['Authorization'] = store.state.token);
         opt.enc === undefined && (opt.enc = process.env.VUE_APP_ENC === "true");
         opt.data = simpleEnc.getInfoData({
           source: 'web', version: 'v1', module: opt.module,
           interface: opt.interface, timestamp: Math.round(new Date().getTime() / 1000)
         }, opt.data, opt.enc);
-      }
-      if (opt.isModule) {
-        !opt.headers && (opt.headers = {});
-        store.state.token && (opt.headers['Authorization'] = store.state.token);
       }
     }
     if (reqLog) console.log("request ->", opt);
