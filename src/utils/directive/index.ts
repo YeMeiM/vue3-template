@@ -13,6 +13,7 @@ export function install(app: App) {
         y2: 0, // 鼠标按下时与dom的相对位置y
       }
       el.addEventListener("touchstart", function (event) {
+        event.preventDefault();
         p.x1 = event.touches[0].clientX;
         p.y1 = event.touches[0].clientY;
         p.x2 = el.offsetLeft - p.x1;
@@ -28,6 +29,12 @@ export function install(app: App) {
         }
 
         function onDragEnd() {
+          window.removeEventListener("touchmove", onDrag)
+          window.removeEventListener("touchend", onDragEnd)
+          if(p.x == 0 && p.y == 0) {
+            el.click();
+            return;
+          }
           // console.log("dragend", JSON.stringify(p))
           const position = Object.assign({
             top: p.y + p.y1 + p.y2,
@@ -35,15 +42,11 @@ export function install(app: App) {
           }, p);
           Object.keys(p).forEach(k => (p as any)[k] = 0);
           el.style.transform = "";
-          window.removeEventListener("touchmove", onDrag)
-          window.removeEventListener("touchend", onDragEnd)
           if (binding.modifiers.auto) {
             el.style.left = position.left + "px";
             el.style.top = position.top + "px";
           }
-          if (typeof binding.value === "function") {
-            binding.value(el, position);
-          }
+          if (typeof binding.value === "function") binding.value(el, position);
         }
 
         window.addEventListener("touchmove", onDrag)
