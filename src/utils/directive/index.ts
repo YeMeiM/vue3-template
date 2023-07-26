@@ -1,4 +1,4 @@
-import { App } from "vue";
+import {App} from "vue";
 
 export function install(app: App) {
   // v-move.auto 添加此指令后，使dom可以拖动
@@ -31,7 +31,7 @@ export function install(app: App) {
         function onDragEnd() {
           window.removeEventListener("touchmove", onDrag)
           window.removeEventListener("touchend", onDragEnd)
-          if(p.x == 0 && p.y == 0) {
+          if (p.x == 0 && p.y == 0) {
             el.click();
             return;
           }
@@ -41,6 +41,10 @@ export function install(app: App) {
             left: p.x + p.x1 + p.x2
           }, p);
           Object.keys(p).forEach(k => (p as any)[k] = 0);
+          if (position.left <= 0) position.left = 0;
+          else if (position.left + el.offsetWidth >= el.offsetParent.clientWidth) position.left = el.offsetParent.clientWidth - el.offsetWidth;
+          if (position.top <= 0) position.top = 0;
+          else if (position.top + el.offsetHeight >= el.offsetParent.clientHeight) position.top = el.offsetParent.clientHeight - el.offsetHeight;
           el.style.transform = "";
           if (binding.modifiers.auto) {
             el.style.left = position.left + "px";
