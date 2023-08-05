@@ -1,10 +1,10 @@
-import { SimpleRequest } from "./SimpleRequest"
-import { App } from "vue";
-import { SimpleEnCryptor } from "./encrypter"
+import {SimpleRequest} from "./SimpleRequest"
+import {App} from "vue";
+import {SimpleEnCryptor} from "./encrypter"
 import router from "@/router";
 import store from "@/store";
-import { Toast } from "vant";
-import { _uu } from "@/utils/func";
+import {Toast} from "vant";
+import {_uu} from "@/utils/func";
 
 interface SimpleRequestEnc {
   module: string;
@@ -43,10 +43,12 @@ export const simpleRequest = new SimpleRequest<Partial<SimpleRequestEnc>>({
         !opt.headers && (opt.headers = {});
         store.state.token && (opt.headers['Authorization'] = store.state.token);
         opt.enc === undefined && (opt.enc = process.env.VUE_APP_ENC === "true");
-        opt.data = simpleEnc.getInfoData({
-          source: 'web', version: 'v1', module: opt.module,
-          interface: opt.interface, timestamp: Math.round(new Date().getTime() / 1000)
-        }, opt.data, opt.enc);
+        if(!opt.isFormData){
+          opt.data = simpleEnc.getInfoData({
+            source: 'web', version: 'v1', module: opt.module,
+            interface: opt.interface, timestamp: Math.round(new Date().getTime() / 1000)
+          }, opt.data, opt.enc);
+        }
       }
     }
     if (reqLog) console.log("request ->", opt);
@@ -60,7 +62,7 @@ export const simpleRequest = new SimpleRequest<Partial<SimpleRequestEnc>>({
         case 0:
           return data.data ?? data;
         case 4700:
-          store.commit("removeUser");
+          store.commit("SET_USER_TOKEN", '');
           router.replace("/login");
           simpleRequest._onErrorTips("登陆信息已过期,请重新登陆", opt.tips)
           throw data;
